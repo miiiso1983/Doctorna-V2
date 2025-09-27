@@ -123,6 +123,10 @@ $router->post('/patient/profile', 'PatientController@updateProfile');
 $router->get('/patient/appointments', 'PatientController@appointments');
 $router->get('/patient/medical-history', 'PatientController@medicalHistory');
 
+// Settings
+$router->get('/patient/settings', 'PatientController@settings');
+$router->post('/patient/settings', 'PatientController@updateSettings');
+
 $router->get('/patient/prescriptions', 'PatientController@prescriptions');
 $router->get('/patient/prescriptions/{id}/print', 'PatientController@printPrescription');
 $router->post('/patient/prescriptions/{id}/refill', 'PatientController@requestRefill');

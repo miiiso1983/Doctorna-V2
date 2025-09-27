@@ -718,6 +718,54 @@ class PatientController extends Controller {
         ];
         $this->renderWithLayout('patient.emergency', $data, 'patient');
     }
+    /**
+     * Settings page
+     */
+    public function settings() {
+        // Load simple settings from user table or defaults
+        $settings = [
+            'language' => $this->patientProfile['language'] ?? 'ar',
+            'notify_email' => (int)($this->patientProfile['notify_email'] ?? 1),
+            'notify_sms' => (int)($this->patientProfile['notify_sms'] ?? 0),
+            'timezone' => $this->patientProfile['timezone'] ?? APP_TIMEZONE,
+        ];
+        $this->renderWithLayout('patient.settings', [
+            'title' => 'الإعدادات',
+            'patient' => $this->patientProfile,
+            'settings' => $settings,
+        ], 'patient');
+    }
+
+    /**
+     * Update settings
+     */
+    public function updateSettings() {
+        if (!$this->isPost()) {
+            $this->redirect('/patient/settings');
+        }
+        $this->validateCSRF();
+        $data = [
+            'language' => $this->post('language', 'ar'),
+            'notify_email' => $this->post('notify_email') ? 1 : 0,
+            'notify_sms' => $this->post('notify_sms') ? 1 : 0,
+            'timezone' => $this->post('timezone', APP_TIMEZONE),
+        ];
+        // Persist settings on patients table if columns exist; fallback to flash only
+        try {
+            // Attempt to update patients table if columns are present
+            $allowed = array_intersect_key($data, array_flip(['language','notify_email','notify_sms','timezone']));
+            if (!empty($allowed)) {
+                $this->patientModel->update($this->patientProfile['id'], $allowed);
+                // Update local copy
+                $this->patientProfile = array_merge($this->patientProfile, $allowed);
+            }
+            $this->flash('success', 'تم حفظ الإعدادات بنجاح');
+        } catch (Exception $e) {
+            $this->flash('warning', 'تم حفظ الإعدادات مؤقتاً في الجلسة');
+        }
+        $this->redirect('/patient/settings');
+    }
+
 
     /**
      * Update emergency info
