@@ -30,19 +30,46 @@ class Auth {
      * Login user
      */
     public function login($user) {
+        // Regenerate session ID first to avoid losing data after assignment
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            @session_regenerate_id(true);
+        }
+
         // Normalize role to lowercase to avoid case-mismatch issues
         $normalizedRole = strtolower($user['role'] ?? '');
         $_SESSION[$this->sessionKey] = $user['id'];
         $_SESSION['user_role'] = $normalizedRole;
         $_SESSION['user_name'] = $user['name'];
 
-        // Update last login
-        $this->db->update('users', [
-            'last_login' => date('Y-m-d H:i:s')
-        ], 'id = :id', ['id' => $user['id']]);
+        // Update last login (non-blocking try/catch)
+        try {
+            $this->db->update('users', [
+                'last_login' => date('Y-m-d H:i:s')
+            ], 'id = :id', ['id' => $user['id']]);
+        } catch (\Throwable $e) {
+            // ignore DB update failure for last_login
+        }
 
-        // Regenerate session ID for security
-        session_regenerate_id(true);
+        // Light login diagnostic
+        try {
+            $logDir = ROOT_PATH . '/storage/logs';
+            if (!is_dir($logDir)) { @mkdir($logDir, 0775, true); }
+            $logLine = sprintf(
+                "[%s] LOGIN OK user_id=%s role=%s sid=%s save_path=%s keys=%s\n",
+                date('c'),
+                (string)$user['id'],
+                $normalizedRole,
+                session_id() ?: '-',
+                ini_get('session.save_path') ?: '-',
+                implode(',', array_keys($_SESSION ?? []))
+            );
+            @file_put_contents($logDir . '/auth.log', $logLine, FILE_APPEND);
+        } catch (\Throwable $e) { /* ignore */ }
+
+        // Ensure data is written before redirect
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            @session_write_close();
+        }
     }
     
     /**
