@@ -185,6 +185,11 @@ $router->post('/ajax/appointment/reject', 'AjaxController@rejectAppointment');
 $router->post('/ajax/doctor/availability', 'AjaxController@checkAvailability');
 $router->get('/ajax/symptoms/recommend', 'AjaxController@recommendSpecialization');
 
+// Notifications (AJAX)
+$router->get('/notifications/check', 'AjaxController@notificationsCheck');
+$router->post('/notifications/{id}/read', 'AjaxController@readNotification');
+
+
 // Dispatch the request
 $router->dispatch();
 

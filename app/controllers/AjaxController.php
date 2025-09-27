@@ -16,6 +16,58 @@ class AjaxController extends Controller {
     }
 
     /**
+     * Notifications: check unread and recent
+     * GET /notifications/check
+     */
+    public function notificationsCheck() {
+        try {
+            $userId = $this->auth->id();
+            if (!$userId) {
+                return $this->success('ok', [
+                    'count' => 0,
+                    'notifications' => []
+                ]);
+            }
+            require_once APP_PATH . '/models/Notification.php';
+            $model = new Notification();
+            $count = $model->unreadCount($userId);
+            $recent = $model->getRecent($userId, 5);
+            return $this->success('ok', [
+                'count' => $count,
+                'notifications' => array_map(function($n){
+                    return [
+                        'id' => (int)$n['id'],
+                        'title' => $n['title'] ?? '',
+                        'message' => $n['message'] ?? '',
+                        'is_read' => (int)($n['is_read'] ?? 0),
+                        'created_at' => $n['created_at'] ?? null
+                    ];
+                }, $recent)
+            ]);
+        } catch (\Throwable $e) {
+            return $this->error('failed', 500);
+        }
+    }
+
+    /**
+     * Notifications: mark as read
+     * POST /notifications/{id}/read
+     */
+    public function readNotification($id) {
+        try {
+            $userId = $this->auth->id();
+            if (!$userId) { return $this->error('غير مصرح', 401); }
+            require_once APP_PATH . '/models/Notification.php';
+            $model = new Notification();
+            $model->markAsRead((int)$id, $userId);
+            return $this->success('تم التحديث', []);
+        } catch (\Throwable $e) {
+            return $this->error('failed', 500);
+        }
+    }
+
+
+    /**
      * Recommend specialization(s) based on symptoms text or IDs
      * GET /ajax/symptoms/recommend?q=... or &ids=1,2,3
      */
