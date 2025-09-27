@@ -181,9 +181,9 @@ class HomeController extends Controller {
 
         // Execute
         $paramsWithPaging = array_merge($params, ['limit' => $perPage, 'offset' => $offset]);
-        $doctors = $this->doctorModel->db->fetchAll($sql, $paramsWithPaging);
-        $countRow = $this->doctorModel->db->fetch($countSql, $params);
-        $total = (int)($countRow['count'] ?? 0);
+        $doctors = $this->doctorModel->fetchRaw($sql, $paramsWithPaging);
+        $countRowArr = $this->doctorModel->fetchRaw($countSql, $params);
+        $total = (int)($countRowArr[0]['count'] ?? 0);
 
         $data = [
             'title' => 'البحث عن الأطباء',

@@ -503,6 +503,8 @@ class ApiController extends Controller {
         } catch (Exception $e) {
             $this->apiError('Failed to book appointment', 500);
         }
+    }
+
     /**
      * Get a single appointment by ID (authorized to owner doctor/patient)
      */
