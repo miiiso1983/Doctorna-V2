@@ -324,6 +324,7 @@ class Appointment extends Model {
      * Get upcoming appointments
      */
     public function getUpcomingAppointments($limit = 10) {
+        $limit = max(1, (int)$limit);
         $sql = "SELECT a.*,
                        p.name as patient_name,
                        d.name as doctor_name,
@@ -337,12 +338,11 @@ class Appointment extends Model {
                 WHERE a.appointment_date >= CURDATE()
                 AND a.status IN (:status1, :status2)
                 ORDER BY a.appointment_date ASC, a.appointment_time ASC
-                LIMIT :limit";
+                LIMIT {$limit}";
 
         return $this->db->fetchAll($sql, [
             'status1' => APPOINTMENT_PENDING,
-            'status2' => APPOINTMENT_CONFIRMED,
-            'limit' => (int)$limit
+            'status2' => APPOINTMENT_CONFIRMED
         ]);
     }
 
@@ -374,6 +374,7 @@ class Appointment extends Model {
      * Get upcoming appointments for a specific patient
      */
     public function getPatientUpcomingAppointments($patientId, $limit = 5) {
+        $limit = max(1, (int)$limit);
         $sql = "SELECT a.*,
                        d.name as doctor_name, d.avatar as doctor_avatar,
                        doc.clinic_name, doc.clinic_address,
@@ -386,15 +387,12 @@ class Appointment extends Model {
                   AND a.appointment_date >= CURDATE()
                   AND a.status IN (:status1, :status2)
                 ORDER BY a.appointment_date ASC, a.appointment_time ASC
-                LIMIT :limit";
+                LIMIT {$limit}";
 
-        // Note: Many DB drivers don't allow binding named params in IN(), so we keep status as named params
-        // and ensure LIMIT is bound as integer.
         return $this->db->fetchAll($sql, [
             'patient_id' => $patientId,
             'status1' => APPOINTMENT_PENDING,
-            'status2' => APPOINTMENT_CONFIRMED,
-            'limit' => (int)$limit
+            'status2' => APPOINTMENT_CONFIRMED
         ]);
     }
 
@@ -402,6 +400,7 @@ class Appointment extends Model {
      * Get recent appointment history for a specific patient
      */
     public function getPatientAppointmentHistory($patientId, $limit = 5) {
+        $limit = max(1, (int)$limit);
         $sql = "SELECT a.*,
                        d.name as doctor_name, d.avatar as doctor_avatar,
                        doc.clinic_name, doc.clinic_address,
@@ -416,13 +415,12 @@ class Appointment extends Model {
                         OR a.status IN (:status1, :status2)
                   )
                 ORDER BY a.appointment_date DESC, a.appointment_time DESC
-                LIMIT :limit";
+                LIMIT {$limit}";
 
         return $this->db->fetchAll($sql, [
             'patient_id' => $patientId,
             'status1' => APPOINTMENT_COMPLETED,
-            'status2' => APPOINTMENT_CANCELLED,
-            'limit' => (int)$limit
+            'status2' => APPOINTMENT_CANCELLED
         ]);
     }
 
