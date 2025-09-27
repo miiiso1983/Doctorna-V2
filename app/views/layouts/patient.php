@@ -182,8 +182,8 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], '/patient/search-doctors') !== false ? 'active' : '' ?>" 
-                   href="<?= $this->url('/patient/search-doctors') ?>">
+                <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], '/patient/search-doctors') !== false ? 'active' : '' ?>"
+                   href="/patient/search-doctors">
                     <i class="fas fa-search me-3"></i>
                     <span class="sidebar-text">البحث عن طبيب</span>
                 </a>

@@ -236,14 +236,14 @@
                             د. <?= $this->escape($this->user()['name']) ?>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="<?= $this->url('/doctor/profile') ?>">
+                            <li><a class="dropdown-item" href="/doctor/profile">
                                 <i class="fas fa-user me-2"></i>الملف الشخصي
                             </a></li>
-                            <li><a class="dropdown-item" href="<?= $this->url('/doctor/settings') ?>">
+                            <li><a class="dropdown-item" href="/doctor/settings">
                                 <i class="fas fa-cog me-2"></i>الإعدادات
                             </a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="<?= $this->url('/logout') ?>">
+                            <li><a class="dropdown-item" href="/logout">
                                 <i class="fas fa-sign-out-alt me-2"></i>تسجيل الخروج
                             </a></li>
                         </ul>
