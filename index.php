@@ -58,6 +58,20 @@ $router->get('/', 'HomeController@index');
 
 // Public pages
 $router->get('/services', 'HomeController@services');
+// Enforce canonical host/scheme to avoid losing session cookies across variants
+$reqScheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https') ? 'https' : 'http';
+$reqHost = $_SERVER['HTTP_HOST'] ?? '';
+$appParts = parse_url(APP_URL);
+$appScheme = $appParts['scheme'] ?? 'http';
+$appHost = $appParts['host'] ?? '';
+$appPort = isset($appParts['port']) ? (':' . $appParts['port']) : '';
+$reqPort = isset($_SERVER['SERVER_PORT']) && !in_array((string)$_SERVER['SERVER_PORT'], ['80','443']) ? (':' . $_SERVER['SERVER_PORT']) : '';
+if ($reqHost && $appHost && (strtolower($reqHost) !== strtolower($appHost) || strtolower($reqScheme) !== strtolower($appScheme))) {
+    $target = $appScheme . '://' . $appHost . $appPort . ($_SERVER['REQUEST_URI'] ?? '/');
+    header('Location: ' . $target, true, 302);
+    exit;
+}
+
 // Register global error handler (logs to storage/logs/error.log and shows friendly page)
 require_once APP_PATH . '/core/ErrorHandler.php';
 ErrorHandler::init();
