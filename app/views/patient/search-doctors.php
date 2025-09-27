@@ -4,8 +4,8 @@
         <div class="row">
             <div class="col-lg-3 col-md-6 mb-3">
                 <label class="form-label">البحث</label>
-                <input type="text" class="form-control" name="search" 
-                       value="<?= $this->escape($filters['search']) ?>" 
+                <input type="text" class="form-control" name="search"
+                       value="<?= $this->escape($filters['search'] ?? '') ?>"
                        placeholder="اسم الطبيب أو التخصص">
             </div>
             
@@ -14,8 +14,8 @@
                 <select class="form-select" name="specialization">
                     <option value="">جميع التخصصات</option>
                     <?php foreach ($specializations as $spec): ?>
-                        <option value="<?= $spec['id'] ?>" 
-                                <?= $filters['specialization'] == $spec['id'] ? 'selected' : '' ?>>
+                        <option value="<?= $spec['id'] ?>"
+                                <?= ($filters['specialization'] ?? '') == $spec['id'] ? 'selected' : '' ?>>
                             <?= $this->escape($spec['name']) ?>
                         </option>
                     <?php endforeach; ?>
@@ -27,8 +27,8 @@
                 <select class="form-select" name="city">
                     <option value="">جميع المدن</option>
                     <?php foreach ($cities as $city): ?>
-                        <option value="<?= $this->escape($city) ?>" 
-                                <?= $filters['city'] == $city ? 'selected' : '' ?>>
+                        <option value="<?= $this->escape($city) ?>"
+                                <?= ($filters['city'] ?? '') == $city ? 'selected' : '' ?>>
                             <?= $this->escape($city) ?>
                         </option>
                     <?php endforeach; ?>
@@ -39,8 +39,8 @@
                 <label class="form-label">الجنس</label>
                 <select class="form-select" name="gender">
                     <option value="">الكل</option>
-                    <option value="male" <?= $filters['gender'] == 'male' ? 'selected' : '' ?>>ذكر</option>
-                    <option value="female" <?= $filters['gender'] == 'female' ? 'selected' : '' ?>>أنثى</option>
+                    <option value="male" <?= ($filters['gender'] ?? '') == 'male' ? 'selected' : '' ?>>ذكر</option>
+                    <option value="female" <?= ($filters['gender'] ?? '') == 'female' ? 'selected' : '' ?>>أنثى</option>
                 </select>
             </div>
             
