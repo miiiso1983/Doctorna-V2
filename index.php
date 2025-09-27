@@ -82,6 +82,8 @@ if (!is_dir($sessionPath)) { @mkdir($sessionPath, 0775, true); }
 @ini_set('session.save_path', $sessionPath);
 
 // Start session now that constants and config are available
+// Use a custom session name to avoid conflicts with any pre-existing PHPSESSID cookies
+@session_name('DOCTORNASESSID');
 $forwardedProto = $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? null;
 $httpsOn = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($forwardedProto === 'https');
 $cookieDomain = parse_url(APP_URL, PHP_URL_HOST) ?: ($_SERVER['HTTP_HOST'] ?? '');

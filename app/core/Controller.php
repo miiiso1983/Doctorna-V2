@@ -140,7 +140,7 @@ class Controller {
                     date('c'),
                     $_SERVER['REQUEST_URI'] ?? '-',
                     session_id() ?: '-',
-                    isset($_COOKIE['PHPSESSID']) ? 'present' : 'missing',
+                    isset($_COOKIE[session_name()]) ? 'present' : 'missing',
                     ini_get('session.save_path') ?: '-',
                     implode(',', array_keys($_SESSION ?? []))
                 );
