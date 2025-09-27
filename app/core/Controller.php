@@ -149,7 +149,25 @@ class Controller {
             if ($this->isAjax()) {
                 $this->error('ليس لديك صلاحية للوصول لهذه الصفحة', 403);
             } else {
-                $this->redirect('/');
+                // If authenticated but wrong role, route to correct dashboard
+                $user = $this->auth->user();
+                if ($user) {
+                    switch (strtolower($user['role'] ?? '')) {
+                        case ROLE_DOCTOR:
+                            $this->redirect('/doctor');
+                            break;
+                        case ROLE_PATIENT:
+                            $this->redirect('/patient');
+                            break;
+                        case ROLE_SUPER_ADMIN:
+                            $this->redirect('/admin');
+                            break;
+                        default:
+                            $this->redirect('/');
+                    }
+                }
+                // Not authenticated
+                $this->redirect('/login');
             }
         }
     }

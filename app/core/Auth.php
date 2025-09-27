@@ -30,15 +30,17 @@ class Auth {
      * Login user
      */
     public function login($user) {
+        // Normalize role to lowercase to avoid case-mismatch issues
+        $normalizedRole = strtolower($user['role'] ?? '');
         $_SESSION[$this->sessionKey] = $user['id'];
-        $_SESSION['user_role'] = $user['role'];
+        $_SESSION['user_role'] = $normalizedRole;
         $_SESSION['user_name'] = $user['name'];
-        
+
         // Update last login
         $this->db->update('users', [
             'last_login' => date('Y-m-d H:i:s')
         ], 'id = :id', ['id' => $user['id']]);
-        
+
         // Regenerate session ID for security
         session_regenerate_id(true);
     }
