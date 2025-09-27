@@ -370,7 +370,7 @@ class DoctorController extends Controller {
 
         if ($this->appointmentModel->update($appointmentId, $updateData)) {
             // Update doctor statistics
-            $this->doctorModel->db->query(
+            $this->doctorModel->query(
                 "UPDATE doctors SET total_appointments = total_appointments + 1 WHERE id = :doctor_id",
                 ['doctor_id' => $this->doctorProfile['id']]
             );

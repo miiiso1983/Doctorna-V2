@@ -340,13 +340,13 @@ class MapController extends Controller {
                 AND d.longitude IS NOT NULL
                 HAVING distance <= :radius
                 ORDER BY distance ASC, d.rating DESC";
-        
+
         $params['lat'] = $latitude;
         $params['lng'] = $longitude;
         $params['radius'] = $radius;
-        
-        $results = $this->doctorModel->db->fetchAll($sql, $params);
-        
+
+        $results = $this->doctorModel->fetchRaw($sql, $params);
+
         // Format results for map display
         return array_map(function($doctor) {
             return [
