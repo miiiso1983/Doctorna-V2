@@ -40,12 +40,7 @@ RedirectMatch 404 /logs/.*$
 RedirectMatch 404 /cache/.*$
 
 # Prevent access to PHP files in uploads directory
-<Directory "public/uploads">
-    <FilesMatch "\.php$">
-        Order allow,deny
-        Deny from all
-    </FilesMatch>
-</Directory>
+# Moved to public/uploads/.htaccess for compatibility on shared hosts
 
 # Set default charset
 AddDefaultCharset UTF-8
@@ -115,9 +110,9 @@ ErrorDocument 404 /errors/404.html
 ErrorDocument 500 /errors/500.html
 ErrorDocument 403 /errors/403.html
 
-# Prevent hotlinking
+# Prevent hotlinking (allow current host)
 RewriteCond %{HTTP_REFERER} !^$
-RewriteCond %{HTTP_REFERER} !^http(s)?://(www\.)?yourdomain.com [NC]
+RewriteCond %{HTTP_REFERER} !^https?://(www\.)?%{HTTP_HOST} [NC]
 RewriteRule \.(jpg|jpeg|png|gif|svg|webp)$ - [NC,F,L]
 
 # Force HTTPS (uncomment in production)
@@ -149,13 +144,3 @@ php_value max_input_time 300
 # Disable server signature
 ServerSignature Off
 
-# Custom error pages
-<IfModule mod_rewrite.c>
-    RewriteEngine On
-    
-    # Handle 404 errors
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond %{REQUEST_URI} !\.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ [NC]
-    RewriteRule . /index.php [L]
-</IfModule>

@@ -240,3 +240,13 @@ curl -H "Authorization: Bearer YOUR_TOKEN" \
 ---
 
 تم تطوير هذا النظام بعناية لتوفير تجربة مستخدم ممتازة وأداء عالي. نرحب بملاحظاتكم واقتراحاتكم لتحسين النظام.
+
+
+
+## Cloudways Deployment (Quick Start)
+1) Set Web Root to `public` in your Cloudways app.
+2) Create `.env` from `.env.example` and fill DB and APP_URL.
+3) SSH: `composer install --no-dev --optimize-autoloader`.
+4) Import `database/schema.sql` to your DB.
+5) Ensure write perms: `logs/ cache/ public/uploads/`.
+6) Restart services. Open your domain.
