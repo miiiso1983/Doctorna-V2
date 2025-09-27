@@ -84,13 +84,17 @@ if (!is_dir($sessionPath)) { @mkdir($sessionPath, 0775, true); }
 // Start session now that constants and config are available
 $forwardedProto = $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? null;
 $httpsOn = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($forwardedProto === 'https');
-session_set_cookie_params([
+$cookieDomain = parse_url(APP_URL, PHP_URL_HOST) ?: ($_SERVER['HTTP_HOST'] ?? '');
+// Use SameSite=None for cross-site flows (requires Secure)
+$cookieParams = [
     'lifetime' => SESSION_LIFETIME,
     'path' => '/',
+    'domain' => $cookieDomain,
     'secure' => $httpsOn,
     'httponly' => true,
-    'samesite' => 'Lax',
-]);
+    'samesite' => $httpsOn ? 'None' : 'Lax',
+];
+session_set_cookie_params($cookieParams);
 session_start();
 
 $router->get('/search-doctors', 'HomeController@searchDoctors');
