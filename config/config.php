@@ -11,8 +11,12 @@ if (file_exists(ROOT_PATH . '/.env')) {
 
 // Application settings
 define('APP_NAME', $_ENV['APP_NAME'] ?? 'Doctorna - نظام حجز المواعيد الطبية');
-$__default_app_url = (isset($_SERVER['HTTP_HOST']) ? (((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST']) : 'http://localhost');
-define('APP_URL', $_ENV['APP_URL'] ?? $__default_app_url);
+$forwardedProto = $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? null;
+$isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($forwardedProto === 'https');
+$scheme = $isHttps ? 'https' : 'http';
+$host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+$__default_app_url = $scheme . '://' . $host;
+define('APP_URL', rtrim($_ENV['APP_URL'] ?? $__default_app_url, '/'));
 define('APP_ENV', $_ENV['APP_ENV'] ?? 'development');
 define('APP_DEBUG', filter_var($_ENV['APP_DEBUG'] ?? true, FILTER_VALIDATE_BOOLEAN));
 define('APP_TIMEZONE', $_ENV['APP_TIMEZONE'] ?? 'Asia/Riyadh');

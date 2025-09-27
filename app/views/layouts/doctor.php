@@ -123,62 +123,62 @@
         
         <ul class="nav flex-column">
             <li class="nav-item">
-                <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], '/doctor') === 0 && strlen($_SERVER['REQUEST_URI']) <= 7 ? 'active' : '' ?>" 
-                   href="<?= $this->url('/doctor') ?>">
+                <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], '/doctor') === 0 && strlen($_SERVER['REQUEST_URI']) <= 7 ? 'active' : '' ?>"
+                   href="/doctor">
                     <i class="fas fa-tachometer-alt me-3"></i>
                     <span class="sidebar-text">الرئيسية</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], '/doctor/appointments') !== false ? 'active' : '' ?>" 
-                   href="<?= $this->url('/doctor/appointments') ?>">
+                <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], '/doctor/appointments') !== false ? 'active' : '' ?>"
+                   href="/doctor/appointments">
                     <i class="fas fa-calendar-check me-3"></i>
                     <span class="sidebar-text">المواعيد</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], '/doctor/patients') !== false ? 'active' : '' ?>" 
-                   href="<?= $this->url('/doctor/patients') ?>">
+                <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], '/doctor/patients') !== false ? 'active' : '' ?>"
+                   href="/doctor/patients">
                     <i class="fas fa-user-injured me-3"></i>
-                    <span class="sidebar-text">المرضى</span>
+                    <span class="sidebar_text">المرضى</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], '/doctor/schedule') !== false ? 'active' : '' ?>" 
-                   href="<?= $this->url('/doctor/schedule') ?>">
+                <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], '/doctor/schedule') !== false ? 'active' : '' ?>"
+                   href="/doctor/schedule">
                     <i class="fas fa-clock me-3"></i>
                     <span class="sidebar-text">الجدول</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], '/doctor/profile') !== false ? 'active' : '' ?>" 
-                   href="<?= $this->url('/doctor/profile') ?>">
+                <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], '/doctor/profile') !== false ? 'active' : '' ?>"
+                   href="/doctor/profile">
                     <i class="fas fa-user-edit me-3"></i>
                     <span class="sidebar-text">الملف الشخصي</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], '/doctor/reviews') !== false ? 'active' : '' ?>" 
-                   href="<?= $this->url('/doctor/reviews') ?>">
+                <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], '/doctor/reviews') !== false ? 'active' : '' ?>"
+                   href="/doctor/reviews">
                     <i class="fas fa-star me-3"></i>
                     <span class="sidebar-text">التقييمات</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], '/doctor/analytics') !== false ? 'active' : '' ?>" 
-                   href="<?= $this->url('/doctor/analytics') ?>">
+                <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], '/doctor/analytics') !== false ? 'active' : '' ?>"
+                   href="/doctor/analytics">
                     <i class="fas fa-chart-line me-3"></i>
                     <span class="sidebar-text">الإحصائيات</span>
                 </a>
             </li>
             <li class="nav-item mt-auto">
-                <a class="nav-link" href="<?= $this->url('/') ?>">
+                <a class="nav-link" href="/">
                     <i class="fas fa-home me-3"></i>
                     <span class="sidebar-text">الموقع الرئيسي</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="<?= $this->url('/logout') ?>">
+                <a class="nav-link" href="/logout">
                     <i class="fas fa-sign-out-alt me-3"></i>
                     <span class="sidebar-text">تسجيل الخروج</span>
                 </a>

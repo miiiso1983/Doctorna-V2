@@ -175,8 +175,8 @@
         
         <ul class="nav flex-column">
             <li class="nav-item">
-                <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], '/patient') === 0 && strlen($_SERVER['REQUEST_URI']) <= 8 ? 'active' : '' ?>" 
-                   href="<?= $this->url('/patient') ?>">
+                <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], '/patient') === 0 && strlen($_SERVER['REQUEST_URI']) <= 8 ? 'active' : '' ?>"
+                   href="/patient">
                     <i class="fas fa-tachometer-alt me-3"></i>
                     <span class="sidebar-text">الرئيسية</span>
                 </a>
@@ -189,48 +189,48 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], '/patient/appointments') !== false ? 'active' : '' ?>" 
-                   href="<?= $this->url('/patient/appointments') ?>">
+                <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], '/patient/appointments') !== false ? 'active' : '' ?>"
+                   href="/patient/appointments">
                     <i class="fas fa-calendar-check me-3"></i>
                     <span class="sidebar-text">مواعيدي</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], '/patient/medical-history') !== false ? 'active' : '' ?>" 
-                   href="<?= $this->url('/patient/medical-history') ?>">
+                <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], '/patient/medical-history') !== false ? 'active' : '' ?>"
+                   href="/patient/medical-history">
                     <i class="fas fa-file-medical me-3"></i>
                     <span class="sidebar-text">التاريخ الطبي</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], '/patient/prescriptions') !== false ? 'active' : '' ?>" 
-                   href="<?= $this->url('/patient/prescriptions') ?>">
+                <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], '/patient/prescriptions') !== false ? 'active' : '' ?>"
+                   href="/patient/prescriptions">
                     <i class="fas fa-prescription-bottle me-3"></i>
                     <span class="sidebar-text">الوصفات الطبية</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], '/patient/profile') !== false ? 'active' : '' ?>" 
-                   href="<?= $this->url('/patient/profile') ?>">
+                <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], '/patient/profile') !== false ? 'active' : '' ?>"
+                   href="/patient/profile">
                     <i class="fas fa-user-edit me-3"></i>
                     <span class="sidebar-text">الملف الشخصي</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], '/patient/emergency') !== false ? 'active' : '' ?>" 
-                   href="<?= $this->url('/patient/emergency') ?>">
+                <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], '/patient/emergency') !== false ? 'active' : '' ?>"
+                   href="/patient/emergency">
                     <i class="fas fa-ambulance me-3"></i>
                     <span class="sidebar-text">الطوارئ</span>
                 </a>
             </li>
             <li class="nav-item mt-auto">
-                <a class="nav-link" href="<?= $this->url('/') ?>">
+                <a class="nav-link" href="/">
                     <i class="fas fa-home me-3"></i>
                     <span class="sidebar-text">الموقع الرئيسي</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="<?= $this->url('/logout') ?>">
+                <a class="nav-link" href="/logout">
                     <i class="fas fa-sign-out-alt me-3"></i>
                     <span class="sidebar-text">تسجيل الخروج</span>
                 </a>
@@ -252,7 +252,7 @@
                 <div class="navbar-nav ms-auto">
                     <!-- Quick Actions -->
                     <div class="nav-item dropdown me-3">
-                        <a class="nav-link" href="<?= $this->url('/patient/search-doctors') ?>" 
+                        <a class="nav-link" href="/patient/search-doctors"
                            data-bs-toggle="tooltip" title="البحث عن طبيب">
                             <i class="fas fa-search fa-lg text-primary"></i>
                         </a>
