@@ -131,6 +131,21 @@ class Controller {
      */
     protected function requireAuth() {
         if (!$this->auth->check()) {
+            // Minimal diagnostics: log why auth failed
+            try {
+                $logDir = ROOT_PATH . '/storage/logs';
+                if (!is_dir($logDir)) { @mkdir($logDir, 0775, true); }
+                $logLine = sprintf(
+                    "[%s] AUTH FAIL path=%s sid=%s cookie=%s session_keys=%s\n",
+                    date('c'),
+                    $_SERVER['REQUEST_URI'] ?? '-',
+                    session_id() ?: '-',
+                    isset($_COOKIE['PHPSESSID']) ? 'present' : 'missing',
+                    implode(',', array_keys($_SESSION ?? []))
+                );
+                @file_put_contents($logDir . '/auth.log', $logLine, FILE_APPEND);
+            } catch (\Throwable $e) { /* ignore */ }
+
             if ($this->isAjax()) {
                 $this->error('يجب تسجيل الدخول أولاً', 401);
             } else {
