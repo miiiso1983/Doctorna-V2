@@ -58,6 +58,10 @@ $router->get('/', 'HomeController@index');
 
 // Public pages
 $router->get('/services', 'HomeController@services');
+// Register global error handler (logs to storage/logs/error.log and shows friendly page)
+require_once APP_PATH . '/core/ErrorHandler.php';
+ErrorHandler::init();
+
 // Start session now that constants and config are available
 $forwardedProto = $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? null;
 $httpsOn = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($forwardedProto === 'https');
