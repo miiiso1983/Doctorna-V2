@@ -49,8 +49,8 @@ class PatientController extends Controller {
                 'created_at' => date('Y-m-d H:i:s')
             ];
 
-            $patientId = $this->patientModel->create($patientData);
-            $this->patientProfile = $this->patientModel->find($patientId);
+            // create() returns the created record, not the ID
+            $this->patientProfile = $this->patientModel->create($patientData);
         }
     }
 
