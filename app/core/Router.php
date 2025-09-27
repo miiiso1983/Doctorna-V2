@@ -178,7 +178,8 @@ class Router {
     }
     
     public static function url($path = '') {
-        return APP_URL . '/' . ltrim($path, '/');
+        $base = rtrim(APP_URL, '/');
+        return $base . '/' . ltrim($path, '/');
     }
 
     public static function asset($path) {
@@ -188,6 +189,7 @@ class Router {
         $docRootReal = $docRoot ? rtrim((realpath($docRoot) ?: $docRoot), '/') : '';
         $isPublicWebroot = ($docRootReal && $publicReal && $docRootReal === $publicReal);
         $prefix = $isPublicWebroot ? '' : 'public/';
-        return APP_URL . '/' . $prefix . $relative;
+        $base = rtrim(APP_URL, '/');
+        return $base . '/' . $prefix . $relative;
     }
 }

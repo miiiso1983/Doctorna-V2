@@ -133,7 +133,8 @@ class View {
      * Generate URL
      */
     public function url($path = '') {
-        return APP_URL . '/' . ltrim($path, '/');
+        $base = rtrim(APP_URL, '/');
+        return $base . '/' . ltrim($path, '/');
     }
 
     /**
@@ -147,7 +148,8 @@ class View {
         // If the web server's document root equals PUBLIC_PATH, don't prefix with 'public/'
         $isPublicWebroot = ($docRootReal && $publicReal && $docRootReal === $publicReal);
         $prefix = $isPublicWebroot ? '' : 'public/';
-        return APP_URL . '/' . $prefix . $relative;
+        $base = rtrim(APP_URL, '/');
+        return $base . '/' . $prefix . $relative;
     }
     /**
      * Build URL with query parameters
