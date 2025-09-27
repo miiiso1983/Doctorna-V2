@@ -30,16 +30,32 @@ class Auth {
      * Login user
      */
     public function login($user) {
-        // Regenerate session ID first to avoid losing data after assignment
-        if (session_status() === PHP_SESSION_ACTIVE) {
-            @session_regenerate_id(true);
-        }
-
         // Normalize role to lowercase to avoid case-mismatch issues
         $normalizedRole = strtolower($user['role'] ?? '');
         $_SESSION[$this->sessionKey] = $user['id'];
         $_SESSION['user_role'] = $normalizedRole;
         $_SESSION['user_name'] = $user['name'];
+
+        // Regenerate session ID to prevent fixation and force Set-Cookie
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            @session_regenerate_id(true);
+        }
+
+        // Explicitly set the session cookie to ensure client receives updated ID
+        try {
+            $forwardedProto = $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? null;
+            $httpsOn = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($forwardedProto === 'https');
+            $cookieDomain = parse_url(APP_URL, PHP_URL_HOST) ?: ($_SERVER['HTTP_HOST'] ?? '');
+            $cookieOptions = [
+                'expires' => 0,
+                'path' => '/',
+                'domain' => $cookieDomain,
+                'secure' => $httpsOn,
+                'httponly' => true,
+                'samesite' => $httpsOn ? 'None' : 'Lax',
+            ];
+            @setcookie(session_name(), session_id(), $cookieOptions);
+        } catch (\Throwable $e) { /* ignore */ }
 
         // Update last login (non-blocking try/catch)
         try {
