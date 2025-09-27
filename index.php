@@ -6,18 +6,9 @@
  * @author Doctorna Team
  * @version 1.0.0
  */
+// Configure session cookie params after constants (needs SESSION_LIFETIME), but start session ASAP
 
-// Configure and start session early
-$forwardedProto = $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? null;
-$httpsOn = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($forwardedProto === 'https');
-session_set_cookie_params([
-    'lifetime' => SESSION_LIFETIME,
-    'path' => '/',
-    'secure' => $httpsOn,
-    'httponly' => true,
-    'samesite' => 'Lax',
-]);
-session_start();
+
 
 // Start output buffering early to catch any accidental BOM/whitespace output
 ob_start();
@@ -67,6 +58,18 @@ $router->get('/', 'HomeController@index');
 
 // Public pages
 $router->get('/services', 'HomeController@services');
+// Start session now that constants and config are available
+$forwardedProto = $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? null;
+$httpsOn = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($forwardedProto === 'https');
+session_set_cookie_params([
+    'lifetime' => SESSION_LIFETIME,
+    'path' => '/',
+    'secure' => $httpsOn,
+    'httponly' => true,
+    'samesite' => 'Lax',
+]);
+session_start();
+
 $router->get('/search-doctors', 'HomeController@searchDoctors');
 $router->get('/map-search', 'HomeController@mapSearch');
 $router->get('/about', 'HomeController@about');
