@@ -219,13 +219,14 @@
     
     <!-- Bootstrap 5 JS -->
     <script src="<?= $this->asset('vendor/bootstrap/bootstrap.bundle.min.js') ?>"></script>
-    
+
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-    
+
     <!-- Custom JS -->
     <script src="<?= $this->asset('js/app.js') ?>"></script>
-    
+    <script src="<?= $this->asset('js/dynamic-features.js') ?>"></script>
+
     <!-- Additional JS -->
     <?php if (isset($additional_js)): ?>
         <?php foreach ($additional_js as $js): ?>

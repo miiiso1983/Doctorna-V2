@@ -97,6 +97,8 @@ $router->get('/doctor/analytics', 'DoctorController@analytics');
 $router->get('/patient', 'PatientController@index');
 $router->get('/patient/search-doctors', 'PatientController@searchDoctors');
 $router->get('/patient/doctor/{id}', 'PatientController@viewDoctor');
+// Map search page for patients
+$router->get('/patient/map-search', 'PatientController@mapSearch');
 
 $router->get('/patient/profile', 'PatientController@profile');
 $router->post('/patient/profile', 'PatientController@updateProfile');
@@ -109,6 +111,11 @@ $router->post('/patient/prescriptions/{id}/refill', 'PatientController@requestRe
 $router->get('/patient/emergency', 'PatientController@emergency');
 $router->post('/patient/emergency', 'PatientController@updateEmergency');
 
+// Map AJAX routes
+$router->post('/map/find-nearby-doctors', 'MapController@findNearbyDoctors');
+$router->post('/map/reverse-geocode', 'MapController@reverseGeocode');
+$router->post('/map/geocode', 'MapController@geocodeAddress');
+$router->post('/map/directions', 'MapController@getDirections');
 
 
 // API routes

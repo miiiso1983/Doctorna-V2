@@ -351,7 +351,8 @@
     
     <!-- Custom JS -->
     <script src="<?= $this->asset('js/app.js') ?>"></script>
-    
+    <script src="<?= $this->asset('js/dynamic-features.js') ?>"></script>
+
     <script>
         // Sidebar toggle
         document.getElementById('sidebar-toggle').addEventListener('click', function() {

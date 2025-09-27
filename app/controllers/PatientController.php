@@ -83,6 +83,19 @@ class PatientController extends Controller {
     }
 
     /**
+     * Map search page
+     */
+    public function mapSearch() {
+        $specializations = $this->specializationModel->getActiveSpecializations();
+        $data = [
+            'title' => 'البحث بالخريطة',
+            'patient' => $this->patientProfile,
+            'specializations' => $specializations
+        ];
+        $this->renderWithLayout('patient.map-search', $data, 'patient');
+    }
+
+    /**
      * Search doctors
      */
     public function searchDoctors() {
