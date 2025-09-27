@@ -60,11 +60,17 @@ class Router {
     }
     
     private function getPath() {
-        $path = $_SERVER['REQUEST_URI'];
-        $path = parse_url($path, PHP_URL_PATH);
+        $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
+        $base = parse_url(APP_URL, PHP_URL_PATH) ?: '';
+        // Strip base path (e.g., if APP_URL includes a subdirectory like /public)
+        if ($base && $base !== '/' && strpos($path, $base) === 0) {
+            $path = substr($path, strlen($base));
+        }
+        // Normalize
+        $path = '/' . ltrim($path, '/');
         return rtrim($path, '/') ?: '/';
     }
-    
+
     private function matchPath($routePath, $requestPath) {
         // Convert route path to regex pattern
         $pattern = preg_replace('/\{([^}]+)\}/', '([^/]+)', $routePath);
@@ -174,8 +180,14 @@ class Router {
     public static function url($path = '') {
         return APP_URL . '/' . ltrim($path, '/');
     }
-    
+
     public static function asset($path) {
-        return APP_URL . '/public/' . ltrim($path, '/');
+        $relative = ltrim($path, '/');
+        $docRoot = rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/');
+        $publicReal = rtrim(realpath(PUBLIC_PATH) ?: PUBLIC_PATH, '/');
+        $docRootReal = $docRoot ? rtrim((realpath($docRoot) ?: $docRoot), '/') : '';
+        $isPublicWebroot = ($docRootReal && $publicReal && $docRootReal === $publicReal);
+        $prefix = $isPublicWebroot ? '' : 'public/';
+        return APP_URL . '/' . $prefix . $relative;
     }
 }
