@@ -137,10 +137,17 @@ class View {
     }
 
     /**
-     * Generate asset URL
+     * Generate asset URL (supports both docroots: project root or /public)
      */
     public function asset($path) {
-        return APP_URL . '/public/' . ltrim($path, '/');
+        $relative = ltrim($path, '/');
+        $docRoot = rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/');
+        $publicReal = rtrim(realpath(PUBLIC_PATH) ?: PUBLIC_PATH, '/');
+        $docRootReal = $docRoot ? rtrim((realpath($docRoot) ?: $docRoot), '/') : '';
+        // If the web server's document root equals PUBLIC_PATH, don't prefix with 'public/'
+        $isPublicWebroot = ($docRootReal && $publicReal && $docRootReal === $publicReal);
+        $prefix = $isPublicWebroot ? '' : 'public/';
+        return APP_URL . '/' . $prefix . $relative;
     }
     /**
      * Build URL with query parameters
