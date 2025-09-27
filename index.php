@@ -76,6 +76,11 @@ if ($reqHost && $appHost && (strtolower($reqHost) !== strtolower($appHost) || st
 require_once APP_PATH . '/core/ErrorHandler.php';
 ErrorHandler::init();
 
+// Ensure a writable, app-local session save path
+$sessionPath = ROOT_PATH . '/storage/sessions';
+if (!is_dir($sessionPath)) { @mkdir($sessionPath, 0775, true); }
+@ini_set('session.save_path', $sessionPath);
+
 // Start session now that constants and config are available
 $forwardedProto = $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? null;
 $httpsOn = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($forwardedProto === 'https');
