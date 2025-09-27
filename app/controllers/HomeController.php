@@ -119,10 +119,109 @@ class HomeController extends Controller {
         $data = [
             'title' => 'شروط الاستخدام'
         ];
-        
+
         $this->renderWithLayout('home.terms', $data, 'main');
     }
-    
+
+    /**
+     * Public: search doctors (no login required)
+     */
+    public function searchDoctors() {
+        $search = $_GET['search'] ?? '';
+        $specialization = $_GET['specialization'] ?? '';
+        $city = $_GET['city'] ?? '';
+        $rating = $_GET['rating'] ?? '';
+        $maxFee = $_GET['max_fee'] ?? '';
+        $page = (int)($_GET['page'] ?? 1);
+
+        $perPage = defined('ITEMS_PER_PAGE') ? ITEMS_PER_PAGE : 12;
+        $offset = ($page - 1) * $perPage;
+
+        // Build search conditions
+        $conditions = ['d.status = :status'];
+        $params = ['status' => 'approved'];
+
+        if ($search) {
+            $conditions[] = "(u.name LIKE :search OR d.biography LIKE :search OR d.clinic_name LIKE :search)";
+            $params['search'] = "%{$search}%";
+        }
+        if ($specialization) {
+            $conditions[] = "d.specialization_id = :specialization";
+            $params['specialization'] = $specialization;
+        }
+        if ($city) {
+            $conditions[] = "u.city = :city";
+            $params['city'] = $city;
+        }
+        if ($rating) {
+            $conditions[] = "d.rating >= :rating";
+            $params['rating'] = $rating;
+        }
+        if ($maxFee) {
+            $conditions[] = "d.consultation_fee <= :max_fee";
+            $params['max_fee'] = $maxFee;
+        }
+
+        $whereClause = implode(' AND ', $conditions);
+
+        $sql = "SELECT d.*, s.name as specialization_name, s.icon as specialization_icon,
+                       u.name, u.email, u.phone, u.city, u.avatar,
+                       (SELECT COUNT(a.id) FROM appointments a WHERE a.doctor_id = d.id) as total_appointments
+                FROM doctors d
+                LEFT JOIN specializations s ON d.specialization_id = s.id
+                LEFT JOIN users u ON d.user_id = u.id
+                WHERE {$whereClause}
+                ORDER BY d.rating DESC, d.total_reviews DESC
+                LIMIT :limit OFFSET :offset";
+
+        $countSql = "SELECT COUNT(*) as count
+                     FROM doctors d
+                     LEFT JOIN users u ON d.user_id = u.id
+                     WHERE {$whereClause}";
+
+        // Execute
+        $paramsWithPaging = array_merge($params, ['limit' => $perPage, 'offset' => $offset]);
+        $doctors = $this->doctorModel->db->fetchAll($sql, $paramsWithPaging);
+        $countRow = $this->doctorModel->db->fetch($countSql, $params);
+        $total = (int)($countRow['count'] ?? 0);
+
+        $data = [
+            'title' => 'البحث عن الأطباء',
+            'doctors' => [
+                'data' => $doctors,
+                'total' => $total,
+                'per_page' => $perPage,
+                'current_page' => $page,
+                'last_page' => (int)ceil($total / $perPage),
+                'from' => $total ? ($offset + 1) : 0,
+                'to' => min($offset + $perPage, $total)
+            ],
+            'specializations' => $this->specializationModel->getActiveSpecializations(),
+            'cities' => $this->userModel->getCities(),
+            'filters' => [
+                'search' => $search,
+                'specialization' => $specialization,
+                'city' => $city,
+                'rating' => $rating,
+                'max_fee' => $maxFee,
+            ]
+        ];
+
+        // Reuse patient search view but render with main layout (public)
+        $this->renderWithLayout('patient.search-doctors', $data, 'main');
+    }
+
+    /**
+     * Public: map search page
+     */
+    public function mapSearch() {
+        $data = [
+            'title' => 'البحث بالخريطة',
+            'specializations' => $this->specializationModel->getActiveSpecializations()
+        ];
+        $this->renderWithLayout('patient.map-search', $data, 'main');
+    }
+
     /**
      * Show FAQ page
      */

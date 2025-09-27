@@ -58,6 +58,8 @@ $router->get('/', 'HomeController@index');
 
 // Public pages
 $router->get('/services', 'HomeController@services');
+$router->get('/search-doctors', 'HomeController@searchDoctors');
+$router->get('/map-search', 'HomeController@mapSearch');
 $router->get('/about', 'HomeController@about');
 $router->get('/contact', 'HomeController@contact');
 $router->post('/contact', 'HomeController@sendContact');

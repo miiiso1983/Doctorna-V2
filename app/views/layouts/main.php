@@ -50,6 +50,9 @@
                         <a class="nav-link" href="<?= $this->url('/') ?>">الرئيسية</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="<?= $this->url('/search-doctors') ?>">البحث عن طبيب</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="<?= $this->url('/services') ?>">الخدمات</a>
                     </li>
                     <li class="nav-item">

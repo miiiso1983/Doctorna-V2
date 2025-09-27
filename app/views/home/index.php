@@ -15,7 +15,7 @@
                         <i class="fas fa-user-plus me-2"></i>
                         إنشاء حساب جديد
                     </a>
-                    <a href="<?= $this->url('/services') ?>" class="btn btn-outline-light btn-lg px-4">
+                    <a href="<?= $this->url('/search-doctors') ?>" class="btn btn-outline-light btn-lg px-4">
                         <i class="fas fa-search me-2"></i>
                         البحث عن طبيب
                     </a>
