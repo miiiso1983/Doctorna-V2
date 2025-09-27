@@ -55,7 +55,23 @@ class Database {
     public function query($sql, $params = []) {
         try {
             $stmt = $this->connection->prepare($sql);
-            $stmt->execute($params);
+            // Bind params with proper types (ensure LIMIT/OFFSET are integers)
+            if (!empty($params)) {
+                foreach ($params as $key => $value) {
+                    $paramName = is_int($key)
+                        ? $key + 1 // positional params are 1-based
+                        : (strpos($key, ':') === 0 ? $key : ':' . $key);
+                    $isIntParam = is_int($value) || (is_string($value) && ctype_digit($value)) || in_array($key, ['limit', 'offset']);
+                    if ($isIntParam) {
+                        $stmt->bindValue($paramName, (int)$value, PDO::PARAM_INT);
+                    } else {
+                        $stmt->bindValue($paramName, $value);
+                    }
+                }
+                $stmt->execute();
+            } else {
+                $stmt->execute();
+            }
             return $stmt;
         } catch (PDOException $e) {
             if (APP_DEBUG) {

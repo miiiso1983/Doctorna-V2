@@ -342,7 +342,7 @@ class Appointment extends Model {
         return $this->db->fetchAll($sql, [
             'status1' => APPOINTMENT_PENDING,
             'status2' => APPOINTMENT_CONFIRMED,
-            'limit' => $limit
+            'limit' => (int)$limit
         ]);
     }
 
@@ -388,6 +388,8 @@ class Appointment extends Model {
                 ORDER BY a.appointment_date ASC, a.appointment_time ASC
                 LIMIT :limit";
 
+        // Note: Many DB drivers don't allow binding named params in IN(), so we keep status as named params
+        // and ensure LIMIT is bound as integer.
         return $this->db->fetchAll($sql, [
             'patient_id' => $patientId,
             'status1' => APPOINTMENT_PENDING,
