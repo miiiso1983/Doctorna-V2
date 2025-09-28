@@ -30,16 +30,16 @@ class Auth {
      * Login user
      */
     public function login($user) {
+        // Regenerate session ID first to prevent fixation (ensure stable propagation on some hosts)
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            @session_regenerate_id(true);
+        }
+
         // Normalize role to lowercase to avoid case-mismatch issues
         $normalizedRole = strtolower($user['role'] ?? '');
         $_SESSION[$this->sessionKey] = $user['id'];
         $_SESSION['user_role'] = $normalizedRole;
         $_SESSION['user_name'] = $user['name'];
-
-        // Regenerate session ID to prevent fixation and force Set-Cookie
-        if (session_status() === PHP_SESSION_ACTIVE) {
-            @session_regenerate_id(true);
-        }
 
         // Explicitly set the session cookie to ensure client receives updated ID
         try {
