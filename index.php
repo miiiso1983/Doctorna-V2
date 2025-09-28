@@ -83,6 +83,13 @@ ErrorHandler::init();
 $sessionPath = ROOT_PATH . '/storage/sessions';
 if (!is_dir($sessionPath)) { @mkdir($sessionPath, 0775, true); }
 @ini_set('session.save_path', $sessionPath);
+// Harden and extend session lifetime on hosts with aggressive GC
+@ini_set('session.gc_maxlifetime', (string)SESSION_LIFETIME);
+@ini_set('session.gc_probability', '1');
+@ini_set('session.gc_divisor', '1000'); // 0.1% chance per request
+@ini_set('session.use_strict_mode', '1');
+@ini_set('session.use_only_cookies', '1');
+@ini_set('session.cookie_httponly', '1');
 
 // Start session now that constants and config are available
 // Use a custom session name to avoid conflicts with any pre-existing PHPSESSID cookies
