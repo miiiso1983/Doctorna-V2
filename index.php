@@ -56,6 +56,9 @@ $router = new Router();
 // Define routes
 $router->get('/', 'HomeController@index');
 
+// Debug routes (secured with DEBUG_KEY)
+$router->get('/debug/session', 'DebugController@session');
+
 // Public pages
 $router->get('/services', 'HomeController@services');
 // Enforce canonical host/scheme to avoid losing session cookies across variants

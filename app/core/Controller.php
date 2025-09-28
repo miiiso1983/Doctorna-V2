@@ -136,11 +136,15 @@ class Controller {
                 $logDir = ROOT_PATH . '/storage/logs';
                 if (!is_dir($logDir)) { @mkdir($logDir, 0775, true); }
                 $logLine = sprintf(
-                    "[%s] AUTH FAIL path=%s sid=%s cookie=%s save_path=%s session_keys=%s\n",
+                    "[%s] AUTH FAIL path=%s sid=%s session_name=%s cookie_%s=%s cookie_DOCTORNASESSID=%s cookie_PHPSESSID=%s save_path=%s session_keys=%s\n",
                     date('c'),
                     $_SERVER['REQUEST_URI'] ?? '-',
                     session_id() ?: '-',
+                    session_name(),
+                    session_name(),
                     isset($_COOKIE[session_name()]) ? 'present' : 'missing',
+                    isset($_COOKIE['DOCTORNASESSID']) ? 'present' : 'missing',
+                    isset($_COOKIE['PHPSESSID']) ? 'present' : 'missing',
                     ini_get('session.save_path') ?: '-',
                     implode(',', array_keys($_SESSION ?? []))
                 );
