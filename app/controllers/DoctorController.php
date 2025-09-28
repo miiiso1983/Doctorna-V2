@@ -624,5 +624,15 @@ class DoctorController extends Controller {
         $this->renderWithLayout('doctor.analytics', $data, 'doctor');
     }
 
-
+    /**
+     * Doctor settings page
+     */
+    public function settings() {
+        $data = [
+            'title' => 'الإعدادات',
+            'doctor' => $this->doctorProfile,
+            'csrf_token' => $this->csrf->token(),
+        ];
+        $this->renderWithLayout('doctor.settings', $data, 'doctor');
+    }
 }

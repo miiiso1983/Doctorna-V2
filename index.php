@@ -145,6 +145,7 @@ $router->get('/doctor/patients', 'DoctorController@patients');
 $router->get('/doctor/patients/{id}', 'DoctorController@patientDetails');
 $router->get('/doctor/reviews', 'DoctorController@reviews');
 $router->get('/doctor/analytics', 'DoctorController@analytics');
+$router->get('/doctor/settings', 'DoctorController@settings');
 
 // Patient routes
 $router->get('/patient', 'PatientController@index');
