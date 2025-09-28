@@ -10,8 +10,10 @@ class Auth {
     
     public function __construct() {
         $this->db = Database::getInstance();
+        // Try restoring auth from backup cookie if session is empty
+        try { $this->maybeRestoreFromCookie(); } catch (\Throwable $e) { /* ignore */ }
     }
-    
+
     /**
      * Attempt to authenticate user
      */
@@ -57,6 +59,9 @@ class Auth {
             @setcookie(session_name(), session_id(), $cookieOptions);
         } catch (\Throwable $e) { /* ignore */ }
 
+        // Write a signed backup cookie to restore auth if PHP session is lost
+        try { $this->writeAuthSnapshotCookie($user['id'], $normalizedRole); } catch (\Throwable $e) { /* ignore */ }
+
         // Update last login (non-blocking try/catch)
         try {
             $this->db->update('users', [
@@ -95,12 +100,14 @@ class Auth {
         unset($_SESSION[$this->sessionKey]);
         unset($_SESSION['user_role']);
         unset($_SESSION['user_name']);
-        
+
         // Destroy session
         session_destroy();
         session_start();
+        // Clear backup cookie
+        try { $this->clearAuthSnapshotCookie(); } catch (\Throwable $e) { /* ignore */ }
     }
-    
+
     /**
      * Check if user is authenticated
      */
@@ -230,7 +237,72 @@ class Auth {
             ['id' => $id]
         );
     }
-    
+
+    /**
+     * If session is empty but a valid snapshot cookie exists, restore minimal auth.
+     */
+    private function maybeRestoreFromCookie(): void {
+        if (!empty($_SESSION[$this->sessionKey])) { return; }
+        $cookie = $_COOKIE['AUTH_SNAPSHOT'] ?? null;
+        if (!$cookie) { return; }
+        $parts = explode('.', $cookie, 2);
+        if (count($parts) !== 2) { return; }
+        [$b64, $sig] = $parts;
+        $payload = base64_decode($b64, true);
+        if ($payload === false) { return; }
+        $calc = hash_hmac('sha256', $payload, APP_KEY);
+        if (!hash_equals($calc, $sig)) { return; }
+        $data = json_decode($payload, true);
+        if (!is_array($data)) { return; }
+        if (($data['exp'] ?? 0) < time()) { return; }
+        $uid = (int)($data['id'] ?? 0);
+        $role = strtolower($data['role'] ?? '');
+        if ($uid > 0 && in_array($role, [ROLE_PATIENT, ROLE_DOCTOR, ROLE_SUPER_ADMIN], true)) {
+            $_SESSION[$this->sessionKey] = $uid;
+            $_SESSION['user_role'] = $role;
+            // do not set user_name here (optional)
+            // Light log
+            try {
+                $logDir = ROOT_PATH . '/storage/logs';
+                if (!is_dir($logDir)) { @mkdir($logDir, 0775, true); }
+                $logLine = sprintf("[%s] AUTH RESTORED from cookie user_id=%s role=%s sid=%s\n", date('c'), (string)$uid, $role, session_id() ?: '-');
+                @file_put_contents($logDir . '/auth.log', $logLine, FILE_APPEND);
+            } catch (\Throwable $e) { /* ignore */ }
+        }
+    }
+
+    private function writeAuthSnapshotCookie($userId, $role): void {
+        $forwardedProto = $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? null;
+        $httpsOn = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($forwardedProto === 'https');
+        $cookieDomain = parse_url(APP_URL, PHP_URL_HOST) ?: ($_SERVER['HTTP_HOST'] ?? '');
+        $expTs = time() + 24 * 60 * 60; // 1 day
+        $payload = json_encode(['id' => (int)$userId, 'role' => (string)$role, 'exp' => $expTs], JSON_UNESCAPED_UNICODE);
+        $b64 = base64_encode($payload);
+        $sig = hash_hmac('sha256', $payload, APP_KEY);
+        $val = $b64 . '.' . $sig;
+        $opts = [
+            'expires' => $expTs,
+            'path' => '/',
+            'domain' => $cookieDomain,
+            'secure' => $httpsOn,
+            'httponly' => true,
+            'samesite' => $httpsOn ? 'None' : 'Lax',
+        ];
+        @setcookie('AUTH_SNAPSHOT', $val, $opts);
+    }
+
+    private function clearAuthSnapshotCookie(): void {
+        $cookieDomain = parse_url(APP_URL, PHP_URL_HOST) ?: ($_SERVER['HTTP_HOST'] ?? '');
+        @setcookie('AUTH_SNAPSHOT', '', [
+            'expires' => time() - 3600,
+            'path' => '/',
+            'domain' => $cookieDomain,
+            'secure' => true,
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
+    }
+
     /**
      * Create user profile based on role
      */
