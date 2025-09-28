@@ -76,7 +76,7 @@
                         <input type="number" name="experience_years" min="0" class="form-control" value="<?= $this->escape($this->old('experience_years')) ?>">
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label class="form-label">الرسوم الاستشارية (ر.س)</label>
+                        <label class="form-label">الرسوم الاستشارية (د.ع)</label>
                         <input type="number" step="0.01" name="consultation_fee" class="form-control" value="<?= $this->escape($this->old('consultation_fee')) ?>">
                     </div>
                 </div>

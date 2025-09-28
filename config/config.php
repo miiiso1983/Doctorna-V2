@@ -19,7 +19,7 @@ $__default_app_url = $scheme . '://' . $host;
 define('APP_URL', rtrim($_ENV['APP_URL'] ?? $__default_app_url, '/'));
 define('APP_ENV', $_ENV['APP_ENV'] ?? 'development');
 define('APP_DEBUG', filter_var($_ENV['APP_DEBUG'] ?? true, FILTER_VALIDATE_BOOLEAN));
-define('APP_TIMEZONE', $_ENV['APP_TIMEZONE'] ?? 'Asia/Riyadh');
+define('APP_TIMEZONE', $_ENV['APP_TIMEZONE'] ?? 'Asia/Baghdad');
 define('APP_KEY', $_ENV['APP_KEY'] ?? 'your-secret-key-here');
 
 // Security settings
@@ -37,8 +37,8 @@ define('DOCTORS_PER_PAGE', (int)($_ENV['DOCTORS_PER_PAGE'] ?? 12));
 
 // Maps configuration
 define('GOOGLE_MAPS_API_KEY', $_ENV['GOOGLE_MAPS_API_KEY'] ?? '');
-define('MAPS_DEFAULT_LAT', (float)($_ENV['MAPS_DEFAULT_LAT'] ?? 24.7136));
-define('MAPS_DEFAULT_LNG', (float)($_ENV['MAPS_DEFAULT_LNG'] ?? 46.6753));
+define('MAPS_DEFAULT_LAT', (float)($_ENV['MAPS_DEFAULT_LAT'] ?? 33.3152));
+define('MAPS_DEFAULT_LNG', (float)($_ENV['MAPS_DEFAULT_LNG'] ?? 44.3661));
 
 // Email configuration
 define('MAIL_DRIVER', $_ENV['MAIL_DRIVER'] ?? 'smtp');

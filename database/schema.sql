@@ -20,7 +20,7 @@ CREATE TABLE users (
     avatar VARCHAR(255),
     address TEXT,
     city VARCHAR(100),
-    country VARCHAR(100) DEFAULT 'Saudi Arabia',
+    country VARCHAR(100) DEFAULT 'Iraq',
     latitude DECIMAL(10, 8),
     longitude DECIMAL(11, 8),
     last_login TIMESTAMP NULL,
@@ -343,29 +343,29 @@ INSERT INTO symptom_specializations (symptom_id, specialization_id, relevance_sc
 
 -- Insert admin user
 INSERT INTO users (name, email, phone, password, role, status, email_verified_at, city, country) VALUES
-('مدير النظام', 'admin@doctorna.com', '+966501234567', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'super_admin', 'active', NOW(), 'الرياض', 'Saudi Arabia');
+('مدير النظام', 'admin@doctorna.com', '+9647701234567', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'super_admin', 'active', NOW(), 'بغداد', 'Iraq');
 
 -- Insert sample doctors
 INSERT INTO users (name, email, phone, password, role, status, email_verified_at, address, city, country, latitude, longitude) VALUES
-('د. أحمد محمد', 'ahmed@doctorna.com', '+966501111111', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'doctor', 'active', NOW(), 'شارع الملك فهد، الرياض', 'الرياض', 'Saudi Arabia', 24.7136, 46.6753),
-('د. فاطمة علي', 'fatima@doctorna.com', '+966502222222', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'doctor', 'active', NOW(), 'شارع التحلية، جدة', 'جدة', 'Saudi Arabia', 21.4858, 39.1925),
-('د. محمد السعيد', 'mohammed@doctorna.com', '+966503333333', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'doctor', 'active', NOW(), 'شارع الأمير سلطان، الدمام', 'الدمام', 'Saudi Arabia', 26.4207, 50.0888);
+('د. أحمد محمد', 'ahmed@doctorna.com', '+9647701111111', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'doctor', 'active', NOW(), 'شارع السعدون، بغداد', 'بغداد', 'Iraq', 33.3152, 44.3661),
+('د. فاطمة علي', 'fatima@doctorna.com', '+9647702222222', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'doctor', 'active', NOW(), 'شارع الجزائر، البصرة', 'البصرة', 'Iraq', 30.5081, 47.7835),
+('د. محمد السعيد', 'mohammed@doctorna.com', '+9647703333333', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'doctor', 'active', NOW(), 'شارع 60 متر، أربيل', 'أربيل', 'Iraq', 36.1911, 44.0092);
 
 -- Insert doctor profiles
 INSERT INTO doctors (user_id, specialization_id, license_number, experience_years, biography, consultation_fee, status, rating, total_reviews, clinic_name, clinic_address, clinic_phone, working_hours, available_days) VALUES
-(2, 1, 'DOC001', 10, 'طبيب عام متخصص في الطب الباطني مع خبرة 10 سنوات في التشخيص والعلاج', 200.00, 'approved', 4.5, 25, 'عيادة الرياض الطبية', 'شارع الملك فهد، الرياض', '+966501111111', '{"morning": {"start": "08:00", "end": "12:00"}, "evening": {"start": "16:00", "end": "20:00"}}', '["sunday", "monday", "tuesday", "wednesday", "thursday"]'),
-(3, 3, 'DOC002', 8, 'طبيبة نساء وولادة متخصصة في الحمل والولادة الطبيعية', 300.00, 'approved', 4.8, 40, 'مستشفى جدة للنساء', 'شارع التحلية، جدة', '+966502222222', '{"morning": {"start": "09:00", "end": "13:00"}, "evening": {"start": "17:00", "end": "21:00"}}', '["sunday", "monday", "tuesday", "wednesday", "thursday", "saturday"]'),
-(4, 4, 'DOC003', 12, 'طبيب قلب وأوعية دموية مع خبرة واسعة في جراحة القلب', 400.00, 'approved', 4.7, 35, 'مركز الدمام لأمراض القلب', 'شارع الأمير سلطان، الدمام', '+966503333333', '{"morning": {"start": "08:30", "end": "12:30"}, "evening": {"start": "15:30", "end": "19:30"}}', '["sunday", "monday", "tuesday", "wednesday", "thursday"]');
+(2, 1, 'DOC001', 10, 'طبيب عام متخصص في الطب الباطني مع خبرة 10 سنوات في التشخيص والعلاج', 200.00, 'approved', 4.5, 25, 'عيادة بغداد الطبية', 'شارع السعدون، بغداد', '+9647701111111', '{"morning": {"start": "08:00", "end": "12:00"}, "evening": {"start": "16:00", "end": "20:00"}}', '["sunday", "monday", "tuesday", "wednesday", "thursday"]'),
+(3, 3, 'DOC002', 8, 'طبيبة نساء وولادة متخصصة في الحمل والولادة الطبيعية', 300.00, 'approved', 4.8, 40, 'مستشفى البصرة للنساء', 'شارع الجزائر، البصرة', '+9647702222222', '{"morning": {"start": "09:00", "end": "13:00"}, "evening": {"start": "17:00", "end": "21:00"}}', '["sunday", "monday", "tuesday", "wednesday", "thursday", "saturday"]'),
+(4, 4, 'DOC003', 12, 'طبيب قلب وأوعية دموية مع خبرة واسعة في جراحة القلب', 400.00, 'approved', 4.7, 35, 'مركز أربيل لأمراض القلب', 'شارع 60 متر، أربيل', '+9647703333333', '{"morning": {"start": "08:30", "end": "12:30"}, "evening": {"start": "15:30", "end": "19:30"}}', '["sunday", "monday", "tuesday", "wednesday", "thursday"]');
 
 -- Insert sample patients
 INSERT INTO users (name, email, phone, password, role, status, email_verified_at, address, city, country, latitude, longitude) VALUES
-('سارة أحمد', 'sara@example.com', '+966504444444', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'patient', 'active', NOW(), 'حي النخيل، الرياض', 'الرياض', 'Saudi Arabia', 24.7500, 46.7000),
-('خالد محمد', 'khalid@example.com', '+966505555555', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'patient', 'active', NOW(), 'حي الصفا، جدة', 'جدة', 'Saudi Arabia', 21.5000, 39.2000);
+('سارة أحمد', 'sara@example.com', '+9647704444444', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'patient', 'active', NOW(), 'حي الكرادة، بغداد', 'بغداد', 'Iraq', 33.3152, 44.3661),
+('خالد محمد', 'khalid@example.com', '+9647705555555', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'patient', 'active', NOW(), 'حي الجبيلة، البصرة', 'البصرة', 'Iraq', 30.5081, 47.7835);
 
 -- Insert patient profiles
 INSERT INTO patients (user_id, date_of_birth, gender, blood_type, emergency_contact, emergency_contact_name) VALUES
-(5, '1990-05-15', 'female', 'O+', '+966506666666', 'أحمد سارة'),
-(6, '1985-12-20', 'male', 'A+', '+966507777777', 'فاطمة خالد');
+(5, '1990-05-15', 'female', 'O+', '+9647706666666', 'أحمد سارة'),
+(6, '1985-12-20', 'male', 'A+', '+9647707777777', 'فاطمة خالد');
 
 -- Insert doctor schedules
 INSERT INTO doctor_schedules (doctor_id, day_of_week, start_time, end_time, is_available, max_appointments) VALUES
@@ -385,7 +385,7 @@ INSERT INTO settings (key_name, value, description, type, is_public) VALUES
 ('site_name', 'Doctorna - نظام حجز المواعيد الطبية', 'اسم الموقع', 'string', TRUE),
 ('site_description', 'نظام متطور لحجز المواعيد الطبية مع الأطباء المتخصصين', 'وصف الموقع', 'string', TRUE),
 ('contact_email', 'info@doctorna.com', 'البريد الإلكتروني للتواصل', 'string', TRUE),
-('contact_phone', '+966500000000', 'رقم الهاتف للتواصل', 'string', TRUE),
+('contact_phone', '+9647700000000', 'رقم الهاتف للتواصل', 'string', TRUE),
 ('appointment_duration', '30', 'مدة الموعد بالدقائق', 'number', FALSE),
 ('max_appointments_per_day', '20', 'أقصى عدد مواعيد في اليوم', 'number', FALSE),
 ('booking_advance_days', '30', 'عدد الأيام المسموح بحجز موعد مسبقاً', 'number', FALSE),

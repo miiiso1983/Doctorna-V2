@@ -154,9 +154,9 @@ let infoWindow;
 
 // Initialize map
 function initMap() {
-    // Default location (Riyadh, Saudi Arabia)
-    const defaultLocation = { lat: 24.7136, lng: 46.6753 };
-    
+    // Default location (Baghdad, Iraq)
+    const defaultLocation = { lat: 33.3152, lng: 44.3661 };
+
     map = new google.maps.Map(document.getElementById('map'), {
         zoom: 12,
         center: defaultLocation,
@@ -376,7 +376,7 @@ function showDoctorInfo(doctor, marker) {
             </div>
             <div class="small mb-2">
                 <div><i class="fas fa-map-marker-alt text-danger me-1"></i> ${doctor.distance} كم</div>
-                <div><i class="fas fa-money-bill text-success me-1"></i> ${doctor.consultation_fee} ر.س</div>
+                <div><i class="fas fa-money-bill text-success me-1"></i> ${Doctorna.utils.formatCurrency(doctor.consultation_fee)}</div>
                 <div><i class="fas fa-clock text-info me-1"></i> ${doctor.experience_years} سنة خبرة</div>
             </div>
             <div class="d-flex gap-1">
@@ -473,7 +473,7 @@ function clearFilters() {
     document.getElementById('radius-filter').value = '10';
     document.getElementById('rating-filter').value = '';
     document.getElementById('fee-filter').value = '500';
-    document.getElementById('fee-value').textContent = '500 ر.س';
+    document.getElementById('fee-value').textContent = Doctorna.utils.formatCurrency(500);
     
     if (userLocation) {
         searchNearbyDoctors();
@@ -504,7 +504,7 @@ function getDirections(lat, lng) {
 
 // Fee range slider
 document.getElementById('fee-filter').addEventListener('input', function() {
-    document.getElementById('fee-value').textContent = this.value + ' ر.س';
+    document.getElementById('fee-value').textContent = Doctorna.utils.formatCurrency(this.value);
 });
 
 // Auto search on filter change

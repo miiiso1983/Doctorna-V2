@@ -144,7 +144,7 @@ class MapController extends Controller {
             'destination' => $destination,
             'key' => $apiKey,
             'language' => 'ar',
-            'region' => 'SA'
+            'region' => 'IQ'
         ]);
         
         $response = file_get_contents($url);
@@ -194,7 +194,7 @@ class MapController extends Controller {
             'address' => $address,
             'key' => $apiKey,
             'language' => 'ar',
-            'region' => 'SA'
+            'region' => 'IQ'
         ]);
         
         $response = file_get_contents($url);
@@ -240,7 +240,7 @@ class MapController extends Controller {
             'latlng' => "{$latitude},{$longitude}",
             'key' => $apiKey,
             'language' => 'ar',
-            'region' => 'SA'
+            'region' => 'IQ'
         ]);
         
         $response = file_get_contents($url);

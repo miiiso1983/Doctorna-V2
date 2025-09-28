@@ -193,11 +193,11 @@
                         </p>
                         <p class="text-muted mb-2">
                             <i class="fas fa-phone me-2"></i>
-                            +966 50 000 0000
+                            +964 770 000 0000
                         </p>
                         <p class="text-muted mb-2">
                             <i class="fas fa-map-marker-alt me-2"></i>
-                            الرياض، المملكة العربية السعودية
+                            بغداد، العراق
                         </p>
                     </div>
                 </div>

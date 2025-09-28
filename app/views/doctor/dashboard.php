@@ -380,7 +380,7 @@
 // Update current time
 function updateTime() {
     const now = new Date();
-    const timeString = now.toLocaleTimeString('ar-SA', {
+    const timeString = now.toLocaleTimeString('ar-IQ', {
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit'

@@ -14,7 +14,7 @@ class DoctornaMap {
         this.directionsRenderer = null;
         
         this.options = {
-            defaultLocation: { lat: 24.7136, lng: 46.6753 }, // Riyadh
+            defaultLocation: { lat: 33.3152, lng: 44.3661 }, // Baghdad
             defaultZoom: 12,
             userZoom: 14,
             ...options
@@ -253,7 +253,7 @@ class DoctornaMap {
                 </div>
                 <div class="small mb-2">
                     <div><i class="fas fa-map-marker-alt text-danger me-1"></i> ${doctor.distance} كم</div>
-                    <div><i class="fas fa-money-bill text-success me-1"></i> ${doctor.consultation_fee} ر.س</div>
+                    <div><i class="fas fa-money-bill text-success me-1"></i> ${doctor.consultation_fee} د.ع</div>
                     <div><i class="fas fa-clock text-info me-1"></i> ${doctor.experience_years} سنة خبرة</div>
                 </div>
                 <div class="d-flex gap-1">

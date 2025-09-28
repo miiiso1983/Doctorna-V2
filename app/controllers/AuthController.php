@@ -162,7 +162,7 @@ class AuthController extends Controller {
             'role' => $data['role'],
             'address' => $data['address'] ?? '',
             'city' => $data['city'] ?? '',
-            'country' => 'Saudi Arabia'
+            'country' => 'Iraq'
         ];
         
         $user = $this->auth->register($userData);

@@ -95,7 +95,7 @@ window.Doctorna = {
                 month: 'long',
                 day: 'numeric'
             };
-            return new Intl.DateTimeFormat('ar-SA', { ...defaultOptions, ...options }).format(new Date(date));
+            return new Intl.DateTimeFormat('ar-IQ', { ...defaultOptions, ...options }).format(new Date(date));
         },
         
         // Validate email

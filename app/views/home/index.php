@@ -8,7 +8,7 @@
                 </h1>
                 <p class="lead mb-4">
                     نظام متطور لحجز المواعيد الطبية يربطك بأفضل الأطباء المتخصصين
-                    في جميع أنحاء المملكة العربية السعودية
+                    في جميع أنحاء العراق
                 </p>
                 <div class="d-flex gap-3 flex-wrap">
                     <a href="<?= $this->url('/register') ?>" class="btn btn-light btn-lg px-4">
