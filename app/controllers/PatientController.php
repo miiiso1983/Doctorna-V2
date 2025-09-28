@@ -83,6 +83,17 @@ class PatientController extends Controller {
     }
 
     /**
+     * Symptoms entry page
+     */
+    public function symptoms() {
+        $data = [
+            'title' => 'كتابة الأعراض',
+            'patient' => $this->patientProfile,
+        ];
+        $this->renderWithLayout('patient.symptoms', $data, 'patient');
+    }
+
+    /**
      * Map search page
      */
     public function mapSearch() {

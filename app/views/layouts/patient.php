@@ -182,10 +182,24 @@
                 </a>
             </li>
             <li class="nav-item">
+                <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], '/patient/symptoms') !== false ? 'active' : '' ?>"
+                   href="/patient/symptoms">
+                    <i class="fas fa-notes-medical me-3"></i>
+                    <span class="sidebar-text">كتابة الأعراض</span>
+                </a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], '/patient/search-doctors') !== false ? 'active' : '' ?>"
                    href="/patient/search-doctors">
                     <i class="fas fa-search me-3"></i>
                     <span class="sidebar-text">البحث عن طبيب</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], '/patient/map-search') !== false ? 'active' : '' ?>"
+                   href="/patient/map-search">
+                    <i class="fas fa-map-marker-alt me-3"></i>
+                    <span class="sidebar-text">البحث بالخريطة</span>
                 </a>
             </li>
             <li class="nav-item">

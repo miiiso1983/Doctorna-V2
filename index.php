@@ -150,6 +150,8 @@ $router->get('/doctor/analytics', 'DoctorController@analytics');
 $router->get('/patient', 'PatientController@index');
 $router->get('/patient/search-doctors', 'PatientController@searchDoctors');
 $router->get('/patient/doctor/{id}', 'PatientController@viewDoctor');
+// Symptoms entry page for patients
+$router->get('/patient/symptoms', 'PatientController@symptoms');
 // Map search page for patients
 $router->get('/patient/map-search', 'PatientController@mapSearch');
 
