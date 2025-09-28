@@ -28,31 +28,42 @@ class CSRF {
      * Validate CSRF token
      */
     public static function validate($token = null) {
+        // 1) Try explicit token param
         if ($token === null) {
             $token = $_POST[CSRF_TOKEN_NAME] ?? $_GET[CSRF_TOKEN_NAME] ?? null;
         }
-        
+        // 2) Fall back to X-CSRF-TOKEN header (for AJAX/JSON requests)
+        if ($token === null) {
+            $token = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? null;
+        }
+
         if (!$token) {
             return false;
         }
-        
+
         if (!isset($_SESSION[self::$tokenKey][$token])) {
             return false;
         }
-        
+
         // Check if token is not expired (1 hour)
         $tokenTime = $_SESSION[self::$tokenKey][$token];
         if (time() - $tokenTime > 3600) {
             unset($_SESSION[self::$tokenKey][$token]);
             return false;
         }
-        
-        // Remove token after use (one-time use)
-        unset($_SESSION[self::$tokenKey][$token]);
-        
+
+        // Token consumption policy:
+        // - For normal form submissions (token in POST/GET), consume once.
+        // - For AJAX header usage (X-CSRF-TOKEN), allow reuse within expiry to avoid breaking background polls.
+        $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+        $tokenCameFromParam = isset($_POST[CSRF_TOKEN_NAME]) || isset($_GET[CSRF_TOKEN_NAME]);
+        if (!$isAjax && $tokenCameFromParam) {
+            unset($_SESSION[self::$tokenKey][$token]);
+        }
+
         return true;
     }
-    
+
     /**
      * Get CSRF input field
      */
