@@ -9,20 +9,48 @@ class CSRF {
     private static $tokenFile = null;
 
     /**
+     * Get or create CSRF session identifier
+     */
+    private static function getCsrfSessionId() {
+        $cookieName = 'csrf_sid';
+
+        // Check if cookie exists
+        if (isset($_COOKIE[$cookieName]) && preg_match('/^[a-zA-Z0-9]{32}$/', $_COOKIE[$cookieName])) {
+            return $_COOKIE[$cookieName];
+        }
+
+        // Create new identifier
+        $csrfSid = bin2hex(random_bytes(16));
+
+        // Set cookie (1 day expiry)
+        $secure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
+                  (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+
+        setcookie($cookieName, $csrfSid, [
+            'expires' => time() + 86400,
+            'path' => '/',
+            'domain' => '',
+            'secure' => $secure,
+            'httponly' => true,
+            'samesite' => 'Lax'
+        ]);
+
+        $_COOKIE[$cookieName] = $csrfSid;
+
+        return $csrfSid;
+    }
+
+    /**
      * Get token storage file path
      */
     private static function getTokenFile() {
         if (self::$tokenFile === null) {
-            $sessionId = session_id();
-            if (!$sessionId) {
-                session_start();
-                $sessionId = session_id();
-            }
+            $csrfSid = self::getCsrfSessionId();
             $dir = ROOT_PATH . '/storage/csrf';
             if (!is_dir($dir)) {
                 @mkdir($dir, 0755, true);
             }
-            self::$tokenFile = $dir . '/tokens_' . $sessionId . '.json';
+            self::$tokenFile = $dir . '/tokens_' . $csrfSid . '.json';
         }
         return self::$tokenFile;
     }
@@ -63,7 +91,8 @@ class CSRF {
 
         // Debug logging
         error_log('CSRF::token() - Generated: ' . substr($token, 0, 16) . '... at ' . date('H:i:s'));
-        error_log('CSRF::token() - Session ID: ' . session_id());
+        error_log('CSRF::token() - CSRF SID: ' . self::getCsrfSessionId());
+        error_log('CSRF::token() - PHP Session ID: ' . session_id());
         error_log('CSRF::token() - Total tokens: ' . count($tokens));
         error_log('CSRF::token() - File: ' . self::getTokenFile());
 
@@ -87,9 +116,11 @@ class CSRF {
 
         // Debug logging
         error_log('CSRF::validate() - Received token: ' . ($token ? substr($token, 0, 16) . '...' : 'NULL'));
-        error_log('CSRF::validate() - Session ID: ' . session_id());
+        error_log('CSRF::validate() - CSRF SID: ' . self::getCsrfSessionId());
+        error_log('CSRF::validate() - PHP Session ID: ' . session_id());
         error_log('CSRF::validate() - Total tokens: ' . count($tokens));
         error_log('CSRF::validate() - File: ' . self::getTokenFile());
+        error_log('CSRF::validate() - Tokens: ' . json_encode(array_keys($tokens)));
 
         if (!$token) {
             error_log('CSRF::validate() - FAILED: No token provided');
