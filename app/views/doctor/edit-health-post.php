@@ -34,7 +34,7 @@
         </div>
 
         <form method="POST" action="<?= $this->url('/doctor/health-posts/' . $post['id'] . '/edit') ?>" enctype="multipart/form-data">
-          <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
+          <?= $this->csrfField() ?>>
 
           <!-- Title -->
           <div class="mb-4">

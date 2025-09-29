@@ -199,7 +199,7 @@ function deletePost(postId) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'X-CSRF-TOKEN': '<?= $this->csrf->token() ?>',
+      'X-CSRF-TOKEN': '<?= $this->csrf() ?>',
       'X-Requested-With': 'XMLHttpRequest'
     }
   })

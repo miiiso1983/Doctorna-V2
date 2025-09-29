@@ -15,7 +15,7 @@
     <div class="card border-0 shadow-sm">
       <div class="card-body p-4">
         <form method="POST" action="<?= $this->url('/doctor/health-posts/create') ?>" enctype="multipart/form-data">
-          <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
+          <?= $this->csrfField() ?>>
 
           <!-- Title -->
           <div class="mb-4">

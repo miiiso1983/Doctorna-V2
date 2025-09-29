@@ -126,8 +126,7 @@ class DoctorController extends Controller {
         $data = [
             'title' => 'الملف الشخصي',
             'doctor' => $this->doctorProfile,
-            'specializations' => $specializations,
-            'csrf_token' => $this->csrf->token()
+            'specializations' => $specializations
         ];
 
         $this->renderWithLayout('doctor.profile', $data, 'doctor');
@@ -228,8 +227,7 @@ class DoctorController extends Controller {
             'doctor' => $this->doctorProfile,
             'schedule' => $schedule,
             'working_days' => WORKING_DAYS,
-            'time_slots' => TIME_SLOTS,
-            'csrf_token' => $this->csrf->token()
+            'time_slots' => TIME_SLOTS
         ];
 
         $this->renderWithLayout('doctor.schedule', $data, 'doctor');
@@ -633,8 +631,7 @@ class DoctorController extends Controller {
     public function settings() {
         $data = [
             'title' => 'الإعدادات',
-            'doctor' => $this->doctorProfile,
-            'csrf_token' => $this->csrf->token(),
+            'doctor' => $this->doctorProfile
         ];
         $this->renderWithLayout('doctor.settings', $data, 'doctor');
     }
@@ -666,8 +663,7 @@ class DoctorController extends Controller {
         $data = [
             'title' => 'إنشاء منشور صحي جديد',
             'doctor' => $this->doctorProfile,
-            'specializations' => $specializations,
-            'csrf_token' => $this->csrf->token()
+            'specializations' => $specializations
         ];
 
         $this->renderWithLayout('doctor.create-health-post', $data, 'doctor');
@@ -741,8 +737,7 @@ class DoctorController extends Controller {
             'title' => 'تعديل المنشور الصحي',
             'doctor' => $this->doctorProfile,
             'post' => $post,
-            'specializations' => $specializations,
-            'csrf_token' => $this->csrf->token()
+            'specializations' => $specializations
         ];
 
         $this->renderWithLayout('doctor.edit-health-post', $data, 'doctor');
