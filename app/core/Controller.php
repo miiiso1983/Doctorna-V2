@@ -121,7 +121,7 @@ class Controller {
      * Validate CSRF token
      */
     protected function validateCSRF() {
-        if (!$this->csrf->validate()) {
+        if (!CSRF::validate()) {
             $this->error('رمز الحماية غير صحيح', 403);
         }
     }

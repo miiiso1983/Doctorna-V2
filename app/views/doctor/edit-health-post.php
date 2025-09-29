@@ -34,7 +34,7 @@
         </div>
 
         <form method="POST" action="<?= $this->url('/doctor/health-posts/' . $post['id'] . '/edit') ?>" enctype="multipart/form-data">
-          <?= $this->csrfField() ?>>
+          <?= $this->csrfField() ?>
 
           <!-- Title -->
           <div class="mb-4">
