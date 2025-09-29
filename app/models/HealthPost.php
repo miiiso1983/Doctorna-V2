@@ -32,8 +32,8 @@ class HealthPost extends Model {
      */
     public function getByDoctor($doctorId, $page = 1, $perPage = 10) {
         $offset = ($page - 1) * $perPage;
-        
-        $sql = "SELECT hp.*, u.name as doctor_name, s.name_ar as specialization_name
+
+        $sql = "SELECT hp.*, u.name as doctor_name, s.name as specialization_name
                 FROM {$this->table} hp
                 LEFT JOIN doctors d ON hp.doctor_id = d.id
                 LEFT JOIN users u ON d.user_id = u.id
@@ -66,19 +66,19 @@ class HealthPost extends Model {
      */
     public function getAllApproved($page = 1, $perPage = 10, $category = null) {
         $offset = ($page - 1) * $perPage;
-        
+
         $conditions = ["hp.status = 'approved'"];
         $params = ['limit' => $perPage, 'offset' => $offset];
-        
+
         if ($category) {
             $conditions[] = "hp.category = :category";
             $params['category'] = $category;
         }
-        
+
         $where = implode(' AND ', $conditions);
-        
+
         $sql = "SELECT hp.*, u.name as doctor_name, u.avatar as doctor_avatar,
-                       s.name_ar as specialization_name
+                       s.name as specialization_name
                 FROM {$this->table} hp
                 LEFT JOIN doctors d ON hp.doctor_id = d.id
                 LEFT JOIN users u ON d.user_id = u.id
@@ -111,19 +111,19 @@ class HealthPost extends Model {
      */
     public function getAllForAdmin($page = 1, $perPage = 10, $status = null) {
         $offset = ($page - 1) * $perPage;
-        
+
         $conditions = [];
         $params = ['limit' => $perPage, 'offset' => $offset];
-        
+
         if ($status) {
             $conditions[] = "hp.status = :status";
             $params['status'] = $status;
         }
-        
+
         $where = !empty($conditions) ? 'WHERE ' . implode(' AND ', $conditions) : '';
-        
+
         $sql = "SELECT hp.*, u.name as doctor_name, u.avatar as doctor_avatar,
-                       s.name_ar as specialization_name
+                       s.name as specialization_name
                 FROM {$this->table} hp
                 LEFT JOIN doctors d ON hp.doctor_id = d.id
                 LEFT JOIN users u ON d.user_id = u.id
@@ -156,7 +156,7 @@ class HealthPost extends Model {
      */
     public function getPostWithDetails($postId) {
         $sql = "SELECT hp.*, u.name as doctor_name, u.avatar as doctor_avatar,
-                       s.name_ar as specialization_name
+                       s.name as specialization_name
                 FROM {$this->table} hp
                 LEFT JOIN doctors d ON hp.doctor_id = d.id
                 LEFT JOIN users u ON d.user_id = u.id
