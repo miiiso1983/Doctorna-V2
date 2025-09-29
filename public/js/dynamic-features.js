@@ -1,5 +1,5 @@
 /**
- * Doctorna Dynamic Features
+ * طبيبك Dynamic Features
  * Advanced AJAX functionality and real-time interactions
  */
 

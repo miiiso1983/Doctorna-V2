@@ -1,7 +1,7 @@
 <?php
 /**
- * Doctorna Installation Script
- * Automated setup for the Doctorna appointment booking system
+ * طبيبك Installation Script
+ * Automated setup for the طبيبك appointment booking system
  */
 
 // Prevent running if already installed
@@ -47,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ]);
         
         // Create .env file
-        $env_content = "# Doctorna Environment Configuration\n\n";
+        $env_content = "# طبيبك Environment Configuration\n\n";
         $env_content .= "# Application\n";
         $env_content .= "APP_NAME=\"{$_POST['app_name']}\"\n";
         $env_content .= "APP_URL=\"{$_POST['app_url']}\"\n";
@@ -125,7 +125,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تثبيت نظام Doctorna</title>
+    <title>تثبيت نظام طبيبك</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
@@ -194,7 +194,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
                 <div class="card-body text-center">
                     <div class="alert alert-success">
-                        <h4>مبروك! تم تثبيت نظام Doctorna بنجاح</h4>
+                        <h4>مبروك! تم تثبيت نظام طبيبك بنجاح</h4>
                         <p>يمكنك الآن الوصول إلى النظام باستخدام بيانات المدير التي أدخلتها.</p>
                     </div>
                     
@@ -224,7 +224,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php else: ?>
             <div class="card">
                 <div class="card-header">
-                    <h2><i class="fas fa-stethoscope"></i> تثبيت نظام Doctorna</h2>
+                    <h2><i class="fas fa-stethoscope"></i> تثبيت نظام طبيبك</h2>
                     <p class="mb-0">نظام حجز المواعيد الطبية الشامل</p>
                 </div>
                 <div class="card-body">
@@ -255,7 +255,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label">اسم التطبيق</label>
-                                <input type="text" class="form-control" name="app_name" value="Doctorna" required>
+                                <input type="text" class="form-control" name="app_name" value="طبيبك" required>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">رابط التطبيق</label>

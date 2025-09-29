@@ -206,14 +206,14 @@ function deletePost(postId) {
   .then(response => response.json())
   .then(data => {
     if (data.success) {
-      Doctorna.showToast(data.message, 'success');
+      showToast(data.message, 'success');
       setTimeout(() => location.reload(), 1000);
     } else {
-      Doctorna.showToast(data.message, 'error');
+      showToast(data.message, 'error');
     }
   })
   .catch(error => {
-    Doctorna.showToast('حدث خطأ أثناء حذف المنشور', 'error');
+    showToast('حدث خطأ أثناء حذف المنشور', 'error');
   });
 }
 </script>

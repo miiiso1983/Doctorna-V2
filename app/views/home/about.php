@@ -6,7 +6,7 @@
 <section class="py-5">
     <div class="container">
         <div class="text-center mb-5">
-            <h2 class="fw-bold">عن نظام Doctorna</h2>
+            <h2 class="fw-bold">عن نظام طبيبك</h2>
             <p class="text-muted">نظام متطور لحجز المواعيد الطبية يربط المرضى بالأطباء المتخصصين</p>
         </div>
         <div class="row">

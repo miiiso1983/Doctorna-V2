@@ -1,5 +1,5 @@
 /**
- * Doctorna - Main JavaScript File
+ * طبيبك - Main JavaScript File
  */
 
 // Global variables

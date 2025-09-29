@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="<?= $description ?? 'تسجيل الدخول إلى نظام Doctorna' ?>">
+    <meta name="description" content="<?= $description ?? 'تسجيل الدخول إلى نظام طبيبك' ?>">
     
     <!-- CSRF Token -->
     <?= CSRF::meta() ?>
@@ -120,7 +120,7 @@
             <div class="brand-logo">
                 <i class="fas fa-stethoscope"></i>
             </div>
-            <h2 class="mb-0">Doctorna</h2>
+            <h2 class="mb-0">طبيبك</h2>
             <p class="mb-0 opacity-75">نظام حجز المواعيد الطبية</p>
         </div>
         

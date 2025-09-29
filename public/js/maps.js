@@ -1,5 +1,5 @@
 /**
- * Doctorna Maps Integration
+ * طبيبك Maps Integration
  * Google Maps functionality for location-based doctor search
  */
 

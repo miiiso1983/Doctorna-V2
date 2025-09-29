@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="لوحة المريض - نظام Doctorna">
+    <meta name="description" content="لوحة المريض - نظام طبيبك">
     
     <!-- CSRF Token -->
     <?= CSRF::meta() ?>
@@ -167,7 +167,7 @@
             <div class="d-flex align-items-center mb-4">
                 <i class="fas fa-user-injured fa-2x text-white me-3"></i>
                 <div class="sidebar-text">
-                    <h5 class="text-white mb-0">Doctorna</h5>
+                    <h5 class="text-white mb-0">طبيبك</h5>
                     <small class="text-white-50">لوحة المريض</small>
                 </div>
             </div>
@@ -438,17 +438,17 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    Doctorna.utils.showToast(data.message, 'success');
+                    showToast(data.message, 'success');
                     setTimeout(() => {
                         window.location.href = '/patient/appointments';
                     }, 2000);
                 } else {
-                    Doctorna.utils.showToast(data.message, 'error');
+                    showToast(data.message, 'error');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                Doctorna.utils.showToast('حدث خطأ غير متوقع', 'error');
+                showToast('حدث خطأ غير متوقع', 'error');
             });
         }
         
@@ -469,15 +469,15 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    Doctorna.utils.showToast(data.message, 'success');
+                    showToast(data.message, 'success');
                     location.reload();
                 } else {
-                    Doctorna.utils.showToast(data.message, 'error');
+                    showToast(data.message, 'error');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                Doctorna.utils.showToast('حدث خطأ غير متوقع', 'error');
+                showToast('حدث خطأ غير متوقع', 'error');
             });
         }
     </script>

@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="<?= $description ?? 'نظام متطور لحجز المواعيد الطبية مع الأطباء المتخصصين' ?>">
     <meta name="keywords" content="طبيب, موعد, حجز, استشارة, صحة">
-    <meta name="author" content="Doctorna Team">
-    
+    <meta name="author" content="طبيبك">
+
     <!-- CSRF Token -->
     <?= CSRF::meta() ?>
-    
-    <title><?= $title ?? 'Doctorna' ?> - <?= APP_NAME ?></title>
+
+    <title><?= $title ?? 'طبيبك' ?> - <?= APP_NAME ?></title>
     
     <!-- Bootstrap 5 RTL CSS -->
     <link href="<?= $this->asset('vendor/bootstrap/bootstrap.rtl.min.css') ?>" rel="stylesheet">
@@ -37,7 +37,7 @@
         <div class="container">
             <a class="navbar-brand fw-bold text-primary" href="<?= $this->url('/') ?>">
                 <i class="fas fa-stethoscope me-2"></i>
-                Doctorna
+                طبيبك
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -148,7 +148,7 @@
                 <div class="col-lg-4 mb-4">
                     <h5 class="fw-bold mb-3">
                         <i class="fas fa-stethoscope me-2"></i>
-                        Doctorna
+                        طبيبك
                     </h5>
                     <p class="text-muted">
                         نظام متطور لحجز المواعيد الطبية يربط المرضى بأفضل الأطباء المتخصصين
@@ -189,7 +189,7 @@
                     <div class="contact-info">
                         <p class="text-muted mb-2">
                             <i class="fas fa-envelope me-2"></i>
-                            info@doctorna.com
+                            info@tabibak.com
                         </p>
                         <p class="text-muted mb-2">
                             <i class="fas fa-phone me-2"></i>
@@ -208,12 +208,12 @@
             <div class="row align-items-center">
                 <div class="col-md-6">
                     <p class="text-muted mb-0">
-                        &copy; <?= date('Y') ?> Doctorna. جميع الحقوق محفوظة.
+                        &copy; <?= date('Y') ?> طبيبك. جميع الحقوق محفوظة.
                     </p>
                 </div>
                 <div class="col-md-6 text-md-end">
                     <p class="text-muted mb-0">
-                        تم التطوير بواسطة <a href="#" class="text-light text-decoration-none">Doctorna Team</a>
+                        تم التطوير بواسطة <a href="#" class="text-light text-decoration-none">طبيبك</a>
                     </p>
                 </div>
             </div>

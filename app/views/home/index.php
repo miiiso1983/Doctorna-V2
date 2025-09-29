@@ -183,7 +183,7 @@
 <section class="py-5">
     <div class="container">
         <div class="text-center mb-5">
-            <h2 class="fw-bold">لماذا تختار Doctorna؟</h2>
+            <h2 class="fw-bold">لماذا تختار طبيبك؟</h2>
             <p class="text-muted">نوفر لك أفضل تجربة لحجز المواعيد الطبية</p>
         </div>
         

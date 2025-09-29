@@ -1,9 +1,9 @@
 <?php
 /**
- * Doctorna - Doctor Appointment Booking System
+ * طبيبك - Doctor Appointment Booking System
  * Main Entry Point
  *
- * @author Doctorna Team
+ * @author طبيبك
  * @version 1.0.0
  */
 // Configure session cookie params after constants (needs SESSION_LIFETIME), but start session ASAP

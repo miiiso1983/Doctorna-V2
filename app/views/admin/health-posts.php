@@ -294,7 +294,7 @@ function approvePost(postId) {
   })
   .then(r => r.json())
   .then(data => {
-    Doctorna.showToast(data.message, data.success ? 'success' : 'error');
+    showToast(data.message, data.success ? 'success' : 'error');
     if (data.success) setTimeout(() => location.reload(), 1000);
   });
 }
@@ -312,7 +312,7 @@ function rejectPost(postId) {
   })
   .then(r => r.json())
   .then(data => {
-    Doctorna.showToast(data.message, data.success ? 'success' : 'error');
+    showToast(data.message, data.success ? 'success' : 'error');
     if (data.success) setTimeout(() => location.reload(), 1000);
   });
 }
@@ -330,7 +330,7 @@ function deletePost(postId) {
   })
   .then(r => r.json())
   .then(data => {
-    Doctorna.showToast(data.message, data.success ? 'success' : 'error');
+    showToast(data.message, data.success ? 'success' : 'error');
     if (data.success) setTimeout(() => location.reload(), 1000);
   });
 }

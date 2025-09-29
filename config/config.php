@@ -10,7 +10,7 @@ if (file_exists(ROOT_PATH . '/.env')) {
 }
 
 // Application settings
-define('APP_NAME', $_ENV['APP_NAME'] ?? 'Doctorna - نظام حجز المواعيد الطبية');
+define('APP_NAME', $_ENV['APP_NAME'] ?? 'طبيبك - نظام حجز المواعيد الطبية');
 $forwardedProto = $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? null;
 $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($forwardedProto === 'https');
 $scheme = $isHttps ? 'https' : 'http';
@@ -48,7 +48,7 @@ define('MAIL_USERNAME', $_ENV['MAIL_USERNAME'] ?? '');
 define('MAIL_PASSWORD', $_ENV['MAIL_PASSWORD'] ?? '');
 define('MAIL_ENCRYPTION', $_ENV['MAIL_ENCRYPTION'] ?? 'tls');
 define('MAIL_FROM_ADDRESS', $_ENV['MAIL_FROM_ADDRESS'] ?? 'noreply@doctorna.com');
-define('MAIL_FROM_NAME', $_ENV['MAIL_FROM_NAME'] ?? 'Doctorna System');
+define('MAIL_FROM_NAME', $_ENV['MAIL_FROM_NAME'] ?? 'طبيبك');
 
 // Cache settings
 define('CACHE_DRIVER', $_ENV['CACHE_DRIVER'] ?? 'file');

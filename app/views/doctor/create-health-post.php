@@ -112,7 +112,7 @@ document.getElementById('image').addEventListener('change', function(e) {
   if (file) {
     // Check file size (5MB max)
     if (file.size > 5 * 1024 * 1024) {
-      Doctorna.showToast('حجم الصورة يجب أن يكون أقل من 5MB', 'error');
+      showToast('حجم الصورة يجب أن يكون أقل من 5MB', 'error');
       e.target.value = '';
       preview.innerHTML = '';
       return;

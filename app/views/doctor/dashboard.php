@@ -435,15 +435,15 @@ function confirmComplete() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            Doctorna.utils.showToast(data.message, 'success');
+            showToast(data.message, 'success');
             location.reload();
         } else {
-            Doctorna.utils.showToast(data.message, 'error');
+            showToast(data.message, 'error');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        Doctorna.utils.showToast('حدث خطأ غير متوقع', 'error');
+        showToast('حدث خطأ غير متوقع', 'error');
     });
     
     bootstrap.Modal.getInstance(document.getElementById('completeModal')).hide();

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="لوحة إدارة نظام Doctorna">
+    <meta name="description" content="لوحة إدارة نظام طبيبك">
     
     <!-- CSRF Token -->
     <?= CSRF::meta() ?>
@@ -120,7 +120,7 @@
             <div class="d-flex align-items-center mb-4">
                 <i class="fas fa-stethoscope fa-2x text-white me-3"></i>
                 <div class="sidebar-text">
-                    <h5 class="text-white mb-0">Doctorna</h5>
+                    <h5 class="text-white mb-0">طبيبك</h5>
                     <small class="text-white-50">لوحة الإدارة</small>
                 </div>
             </div>
