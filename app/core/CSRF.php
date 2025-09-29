@@ -6,25 +6,66 @@
 
 class CSRF {
     private static $tokenKey = 'csrf_tokens';
-    
+    private static $tokenFile = null;
+
+    /**
+     * Get token storage file path
+     */
+    private static function getTokenFile() {
+        if (self::$tokenFile === null) {
+            $sessionId = session_id();
+            if (!$sessionId) {
+                session_start();
+                $sessionId = session_id();
+            }
+            $dir = ROOT_PATH . '/storage/csrf';
+            if (!is_dir($dir)) {
+                @mkdir($dir, 0755, true);
+            }
+            self::$tokenFile = $dir . '/tokens_' . $sessionId . '.json';
+        }
+        return self::$tokenFile;
+    }
+
+    /**
+     * Get tokens from storage
+     */
+    private static function getTokens() {
+        $file = self::getTokenFile();
+        if (file_exists($file)) {
+            $data = json_decode(file_get_contents($file), true);
+            return is_array($data) ? $data : [];
+        }
+        return [];
+    }
+
+    /**
+     * Save tokens to storage
+     */
+    private static function saveTokens($tokens) {
+        $file = self::getTokenFile();
+        file_put_contents($file, json_encode($tokens));
+    }
+
     /**
      * Generate CSRF token
      */
     public static function token() {
-        if (!isset($_SESSION[self::$tokenKey])) {
-            $_SESSION[self::$tokenKey] = [];
-        }
+        $tokens = self::getTokens();
 
         $token = bin2hex(random_bytes(32));
-        $_SESSION[self::$tokenKey][$token] = time();
+        $tokens[$token] = time();
 
         // Clean old tokens (older than 1 hour)
-        self::cleanOldTokens();
+        self::cleanOldTokens($tokens);
+
+        self::saveTokens($tokens);
 
         // Debug logging
         error_log('CSRF::token() - Generated: ' . substr($token, 0, 16) . '... at ' . date('H:i:s'));
         error_log('CSRF::token() - Session ID: ' . session_id());
-        error_log('CSRF::token() - Total tokens in session: ' . count($_SESSION[self::$tokenKey]));
+        error_log('CSRF::token() - Total tokens: ' . count($tokens));
+        error_log('CSRF::token() - File: ' . self::getTokenFile());
 
         return $token;
     }
@@ -42,26 +83,30 @@ class CSRF {
             $token = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? null;
         }
 
+        $tokens = self::getTokens();
+
         // Debug logging
         error_log('CSRF::validate() - Received token: ' . ($token ? substr($token, 0, 16) . '...' : 'NULL'));
         error_log('CSRF::validate() - Session ID: ' . session_id());
-        error_log('CSRF::validate() - Tokens in session: ' . count($_SESSION[self::$tokenKey] ?? []));
-        error_log('CSRF::validate() - Session data: ' . print_r($_SESSION[self::$tokenKey] ?? [], true));
+        error_log('CSRF::validate() - Total tokens: ' . count($tokens));
+        error_log('CSRF::validate() - File: ' . self::getTokenFile());
 
         if (!$token) {
             error_log('CSRF::validate() - FAILED: No token provided');
             return false;
         }
 
-        if (!isset($_SESSION[self::$tokenKey][$token])) {
-            error_log('CSRF::validate() - FAILED: Token not found in session');
+        if (!isset($tokens[$token])) {
+            error_log('CSRF::validate() - FAILED: Token not found');
             return false;
         }
 
         // Check if token is not expired (1 hour)
-        $tokenTime = $_SESSION[self::$tokenKey][$token];
+        $tokenTime = $tokens[$token];
         if (time() - $tokenTime > 3600) {
-            unset($_SESSION[self::$tokenKey][$token]);
+            unset($tokens[$token]);
+            self::saveTokens($tokens);
+            error_log('CSRF::validate() - FAILED: Token expired');
             return false;
         }
 
@@ -71,9 +116,11 @@ class CSRF {
         $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
         $tokenCameFromParam = isset($_POST[CSRF_TOKEN_NAME]) || isset($_GET[CSRF_TOKEN_NAME]);
         if (!$isAjax && $tokenCameFromParam) {
-            unset($_SESSION[self::$tokenKey][$token]);
+            unset($tokens[$token]);
+            self::saveTokens($tokens);
         }
 
+        error_log('CSRF::validate() - SUCCESS');
         return true;
     }
 
@@ -96,16 +143,12 @@ class CSRF {
     /**
      * Clean old tokens
      */
-    private static function cleanOldTokens() {
-        if (!isset($_SESSION[self::$tokenKey])) {
-            return;
-        }
-        
+    private static function cleanOldTokens(&$tokens) {
         $currentTime = time();
-        
-        foreach ($_SESSION[self::$tokenKey] as $token => $time) {
+
+        foreach ($tokens as $token => $time) {
             if ($currentTime - $time > 3600) { // 1 hour
-                unset($_SESSION[self::$tokenKey][$token]);
+                unset($tokens[$token]);
             }
         }
     }
@@ -114,7 +157,10 @@ class CSRF {
      * Clear all tokens
      */
     public static function clear() {
-        $_SESSION[self::$tokenKey] = [];
+        $file = self::getTokenFile();
+        if (file_exists($file)) {
+            @unlink($file);
+        }
     }
     
     /**
