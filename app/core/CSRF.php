@@ -11,11 +11,6 @@ class CSRF {
      * Generate CSRF token
      */
     public static function token() {
-        // Ensure session is started
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-            session_start();
-        }
-
         if (!isset($_SESSION[self::$tokenKey])) {
             $_SESSION[self::$tokenKey] = [];
         }
@@ -23,13 +18,13 @@ class CSRF {
         $token = bin2hex(random_bytes(32));
         $_SESSION[self::$tokenKey][$token] = time();
 
-        // Debug logging
-        error_log('CSRF::token() - Generated token: ' . $token);
-        error_log('CSRF::token() - Session ID: ' . session_id());
-        error_log('CSRF::token() - Tokens in session: ' . print_r($_SESSION[self::$tokenKey], true));
-
         // Clean old tokens (older than 1 hour)
         self::cleanOldTokens();
+
+        // Debug logging
+        error_log('CSRF::token() - Generated: ' . substr($token, 0, 16) . '... at ' . date('H:i:s'));
+        error_log('CSRF::token() - Session ID: ' . session_id());
+        error_log('CSRF::token() - Total tokens in session: ' . count($_SESSION[self::$tokenKey]));
 
         return $token;
     }
@@ -47,11 +42,19 @@ class CSRF {
             $token = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? null;
         }
 
+        // Debug logging
+        error_log('CSRF::validate() - Received token: ' . ($token ? substr($token, 0, 16) . '...' : 'NULL'));
+        error_log('CSRF::validate() - Session ID: ' . session_id());
+        error_log('CSRF::validate() - Tokens in session: ' . count($_SESSION[self::$tokenKey] ?? []));
+        error_log('CSRF::validate() - Session data: ' . print_r($_SESSION[self::$tokenKey] ?? [], true));
+
         if (!$token) {
+            error_log('CSRF::validate() - FAILED: No token provided');
             return false;
         }
 
         if (!isset($_SESSION[self::$tokenKey][$token])) {
+            error_log('CSRF::validate() - FAILED: Token not found in session');
             return false;
         }
 
