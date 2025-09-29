@@ -11,16 +11,26 @@ class CSRF {
      * Generate CSRF token
      */
     public static function token() {
+        // Ensure session is started
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
+
         if (!isset($_SESSION[self::$tokenKey])) {
             $_SESSION[self::$tokenKey] = [];
         }
-        
+
         $token = bin2hex(random_bytes(32));
         $_SESSION[self::$tokenKey][$token] = time();
-        
+
+        // Debug logging
+        error_log('CSRF::token() - Generated token: ' . $token);
+        error_log('CSRF::token() - Session ID: ' . session_id());
+        error_log('CSRF::token() - Tokens in session: ' . print_r($_SESSION[self::$tokenKey], true));
+
         // Clean old tokens (older than 1 hour)
         self::cleanOldTokens();
-        
+
         return $token;
     }
     
