@@ -170,10 +170,17 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], '/admin/analytics') !== false ? 'active' : '' ?>" 
+                <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], '/admin/analytics') !== false ? 'active' : '' ?>"
                    href="<?= $this->url('/admin/analytics') ?>">
                     <i class="fas fa-chart-bar me-3"></i>
                     <span class="sidebar-text">التقارير</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], '/admin/health-posts') !== false ? 'active' : '' ?>"
+                   href="<?= $this->url('/admin/health-posts') ?>">
+                    <i class="fas fa-notes-medical me-3"></i>
+                    <span class="sidebar-text">المنشورات الصحية</span>
                 </a>
             </li>
             <li class="nav-item mt-auto">

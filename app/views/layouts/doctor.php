@@ -171,6 +171,20 @@
                     <span class="sidebar-text">الإحصائيات</span>
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], '/doctor/health-posts') !== false ? 'active' : '' ?>"
+                   href="/doctor/health-posts">
+                    <i class="fas fa-notes-medical me-3"></i>
+                    <span class="sidebar-text">منشوراتي الصحية</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], '/doctor/health-info') !== false ? 'active' : '' ?>"
+                   href="/doctor/health-info">
+                    <i class="fas fa-heartbeat me-3"></i>
+                    <span class="sidebar-text">معلومات صحية</span>
+                </a>
+            </li>
             <li class="nav-item mt-auto">
                 <a class="nav-link" href="/">
                     <i class="fas fa-home me-3"></i>

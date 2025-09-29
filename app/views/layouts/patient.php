@@ -203,6 +203,13 @@
                 </a>
             </li>
             <li class="nav-item">
+                <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], '/patient/health-info') !== false ? 'active' : '' ?>"
+                   href="/patient/health-info">
+                    <i class="fas fa-heartbeat me-3"></i>
+                    <span class="sidebar-text">معلومات صحية</span>
+                </a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], '/patient/appointments') !== false ? 'active' : '' ?>"
                    href="/patient/appointments">
                     <i class="fas fa-calendar-check me-3"></i>

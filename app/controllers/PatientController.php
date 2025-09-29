@@ -11,6 +11,7 @@ require_once APP_PATH . '/models/Patient.php';
 require_once APP_PATH . '/models/Appointment.php';
 require_once APP_PATH . '/models/Specialization.php';
 require_once APP_PATH . '/models/Notification.php';
+require_once APP_PATH . '/models/HealthPost.php';
 
 class PatientController extends Controller {
     private $userModel;
@@ -18,6 +19,7 @@ class PatientController extends Controller {
     private $patientModel;
     private $appointmentModel;
     private $specializationModel;
+    private $healthPostModel;
     private $patientProfile;
 
     public function __construct() {
@@ -31,6 +33,7 @@ class PatientController extends Controller {
         $this->patientModel = new Patient();
         $this->appointmentModel = new Appointment();
         $this->specializationModel = new Specialization();
+        $this->healthPostModel = new HealthPost();
 
         // Get patient profile
         $this->patientProfile = $this->patientModel->getByUserId($this->auth->id());
@@ -799,4 +802,25 @@ class PatientController extends Controller {
         return $this->redirect('/patient/emergency');
     }
 
+    /**
+     * View health info (approved posts)
+     */
+    public function healthInfo() {
+        $page = $this->get('page', 1);
+        $category = $this->get('category', null);
+
+        $posts = $this->healthPostModel->getAllApproved($page, 10, $category);
+        $categories = $this->healthPostModel->getCategories();
+
+        $data = [
+            'title' => 'معلومات صحية',
+            'patient' => $this->patientProfile,
+            'posts' => $posts,
+            'categories' => $categories,
+            'selected_category' => $category
+        ];
+
+        $this->renderWithLayout('patient.health-info', $data, 'patient');
+    }
 }
+

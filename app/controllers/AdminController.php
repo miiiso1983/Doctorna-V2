@@ -10,6 +10,7 @@ require_once APP_PATH . '/models/Doctor.php';
 require_once APP_PATH . '/models/Patient.php';
 require_once APP_PATH . '/models/Appointment.php';
 require_once APP_PATH . '/models/Specialization.php';
+require_once APP_PATH . '/models/HealthPost.php';
 
 class AdminController extends Controller {
     private $userModel;
@@ -17,6 +18,7 @@ class AdminController extends Controller {
     private $patientModel;
     private $appointmentModel;
     private $specializationModel;
+    private $healthPostModel;
     
     public function __construct() {
         parent::__construct();
@@ -29,6 +31,7 @@ class AdminController extends Controller {
         $this->patientModel = new Patient();
         $this->appointmentModel = new Appointment();
         $this->specializationModel = new Specialization();
+        $this->healthPostModel = new HealthPost();
     }
     
     /**
@@ -357,4 +360,94 @@ class AdminController extends Controller {
         
         return $this->doctorModel->fetchRaw($sql);
     }
+
+    /**
+     * Health posts management
+     */
+    public function healthPosts() {
+        $page = $this->get('page', 1);
+        $status = $this->get('status', null);
+
+        $posts = $this->healthPostModel->getAllForAdmin($page, 15, $status);
+        $stats = $this->healthPostModel->getAdminStats();
+
+        $data = [
+            'title' => 'إدارة المنشورات الصحية',
+            'posts' => $posts,
+            'stats' => $stats,
+            'selected_status' => $status
+        ];
+
+        $this->renderWithLayout('admin.health-posts', $data, 'admin');
+    }
+
+    /**
+     * Approve health post
+     */
+    public function approveHealthPost($id) {
+        if (!$this->isPost() || !$this->isAjax()) {
+            $this->error('طريقة الطلب غير صحيحة');
+        }
+
+        $this->validateCSRF();
+
+        $post = $this->healthPostModel->getPostWithDetails($id);
+
+        if (!$post) {
+            $this->error('المنشور غير موجود');
+        }
+
+        if ($this->healthPostModel->updateStatus($id, 'approved')) {
+            $this->success('تم الموافقة على المنشور بنجاح');
+        } else {
+            $this->error('حدث خطأ أثناء الموافقة على المنشور');
+        }
+    }
+
+    /**
+     * Reject health post
+     */
+    public function rejectHealthPost($id) {
+        if (!$this->isPost() || !$this->isAjax()) {
+            $this->error('طريقة الطلب غير صحيحة');
+        }
+
+        $this->validateCSRF();
+
+        $post = $this->healthPostModel->getPostWithDetails($id);
+
+        if (!$post) {
+            $this->error('المنشور غير موجود');
+        }
+
+        if ($this->healthPostModel->updateStatus($id, 'rejected')) {
+            $this->success('تم رفض المنشور بنجاح');
+        } else {
+            $this->error('حدث خطأ أثناء رفض المنشور');
+        }
+    }
+
+    /**
+     * Delete health post
+     */
+    public function deleteHealthPost($id) {
+        if (!$this->isPost() || !$this->isAjax()) {
+            $this->error('طريقة الطلب غير صحيحة');
+        }
+
+        $this->validateCSRF();
+
+        $post = $this->healthPostModel->getPostWithDetails($id);
+
+        if (!$post) {
+            $this->error('المنشور غير موجود');
+        }
+
+        if ($this->healthPostModel->deletePost($id)) {
+            $this->success('تم حذف المنشور بنجاح');
+        } else {
+            $this->error('حدث خطأ أثناء حذف المنشور');
+        }
+    }
 }
+

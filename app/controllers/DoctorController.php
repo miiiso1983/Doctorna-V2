@@ -10,6 +10,7 @@ require_once APP_PATH . '/models/Doctor.php';
 require_once APP_PATH . '/models/Patient.php';
 require_once APP_PATH . '/models/Appointment.php';
 require_once APP_PATH . '/models/Specialization.php';
+require_once APP_PATH . '/models/HealthPost.php';
 
 class DoctorController extends Controller {
     private $userModel;
@@ -17,6 +18,7 @@ class DoctorController extends Controller {
     private $patientModel;
     private $appointmentModel;
     private $specializationModel;
+    private $healthPostModel;
     private $doctorProfile;
 
     public function __construct() {
@@ -30,6 +32,7 @@ class DoctorController extends Controller {
         $this->patientModel = new Patient();
         $this->appointmentModel = new Appointment();
         $this->specializationModel = new Specialization();
+        $this->healthPostModel = new HealthPost();
 
         // Get doctor profile
         $this->doctorProfile = $this->doctorModel->getByUserId($this->auth->id());
@@ -634,5 +637,217 @@ class DoctorController extends Controller {
             'csrf_token' => $this->csrf->token(),
         ];
         $this->renderWithLayout('doctor.settings', $data, 'doctor');
+    }
+
+    /**
+     * Health posts management - doctor's own posts
+     */
+    public function healthPosts() {
+        $page = $this->get('page', 1);
+        $posts = $this->healthPostModel->getByDoctor($this->doctorProfile['id'], $page);
+        $stats = $this->healthPostModel->getDoctorStats($this->doctorProfile['id']);
+
+        $data = [
+            'title' => 'منشوراتي الصحية',
+            'doctor' => $this->doctorProfile,
+            'posts' => $posts,
+            'stats' => $stats
+        ];
+
+        $this->renderWithLayout('doctor.health-posts', $data, 'doctor');
+    }
+
+    /**
+     * Show create health post form
+     */
+    public function createHealthPost() {
+        $specializations = $this->specializationModel->getActiveSpecializations();
+
+        $data = [
+            'title' => 'إنشاء منشور صحي جديد',
+            'doctor' => $this->doctorProfile,
+            'specializations' => $specializations,
+            'csrf_token' => $this->csrf->token()
+        ];
+
+        $this->renderWithLayout('doctor.create-health-post', $data, 'doctor');
+    }
+
+    /**
+     * Store new health post
+     */
+    public function storeHealthPost() {
+        if (!$this->isPost()) {
+            $this->redirect('/doctor/health-posts/create');
+        }
+
+        $this->validateCSRF();
+
+        $postData = $this->post();
+
+        // Validate input
+        $errors = $this->validate($postData, [
+            'title' => 'required|min:5|max:255',
+            'content' => 'required|min:50'
+        ]);
+
+        if (!empty($errors)) {
+            $_SESSION['errors'] = $errors;
+            $_SESSION['old'] = $postData;
+            $this->redirect('/doctor/health-posts/create');
+        }
+
+        try {
+            // Handle image upload
+            $imagePath = null;
+            if (!empty($_FILES['image']['name'])) {
+                $imagePath = $this->uploadFile($_FILES['image'], 'uploads/health-posts', ['jpg', 'jpeg', 'png', 'webp']);
+            }
+
+            $data = [
+                'doctor_id' => $this->doctorProfile['id'],
+                'title' => $postData['title'],
+                'content' => $postData['content'],
+                'image_path' => $imagePath,
+                'category' => $postData['category'] ?? null,
+                'status' => 'pending'
+            ];
+
+            $this->healthPostModel->createPost($data);
+
+            $this->flash('success', 'تم إنشاء المنشور بنجاح. سيتم مراجعته من قبل الإدارة قبل النشر.');
+            $this->redirect('/doctor/health-posts');
+
+        } catch (Exception $e) {
+            $this->flash('error', 'حدث خطأ أثناء إنشاء المنشور');
+            $this->redirect('/doctor/health-posts/create');
+        }
+    }
+
+    /**
+     * Show edit health post form
+     */
+    public function editHealthPost($id) {
+        $post = $this->healthPostModel->getPostWithDetails($id);
+
+        if (!$post || $post['doctor_id'] != $this->doctorProfile['id']) {
+            $this->flash('error', 'المنشور غير موجود أو غير مخول لك');
+            $this->redirect('/doctor/health-posts');
+        }
+
+        $specializations = $this->specializationModel->getActiveSpecializations();
+
+        $data = [
+            'title' => 'تعديل المنشور الصحي',
+            'doctor' => $this->doctorProfile,
+            'post' => $post,
+            'specializations' => $specializations,
+            'csrf_token' => $this->csrf->token()
+        ];
+
+        $this->renderWithLayout('doctor.edit-health-post', $data, 'doctor');
+    }
+
+    /**
+     * Update health post
+     */
+    public function updateHealthPost($id) {
+        if (!$this->isPost()) {
+            $this->redirect('/doctor/health-posts');
+        }
+
+        $this->validateCSRF();
+
+        $post = $this->healthPostModel->getPostWithDetails($id);
+
+        if (!$post || $post['doctor_id'] != $this->doctorProfile['id']) {
+            $this->flash('error', 'المنشور غير موجود أو غير مخول لك');
+            $this->redirect('/doctor/health-posts');
+        }
+
+        $postData = $this->post();
+
+        // Validate input
+        $errors = $this->validate($postData, [
+            'title' => 'required|min:5|max:255',
+            'content' => 'required|min:50'
+        ]);
+
+        if (!empty($errors)) {
+            $_SESSION['errors'] = $errors;
+            $_SESSION['old'] = $postData;
+            $this->redirect('/doctor/health-posts/' . $id . '/edit');
+        }
+
+        try {
+            // Handle image upload
+            $imagePath = $post['image_path'];
+            if (!empty($_FILES['image']['name'])) {
+                $newImage = $this->uploadFile($_FILES['image'], 'uploads/health-posts', ['jpg', 'jpeg', 'png', 'webp']);
+                if ($newImage) {
+                    $imagePath = $newImage;
+                }
+            }
+
+            $data = [
+                'title' => $postData['title'],
+                'content' => $postData['content'],
+                'image_path' => $imagePath,
+                'category' => $postData['category'] ?? null
+            ];
+
+            $this->healthPostModel->updatePost($id, $data);
+
+            $this->flash('success', 'تم تحديث المنشور بنجاح');
+            $this->redirect('/doctor/health-posts');
+
+        } catch (Exception $e) {
+            $this->flash('error', 'حدث خطأ أثناء تحديث المنشور');
+            $this->redirect('/doctor/health-posts/' . $id . '/edit');
+        }
+    }
+
+    /**
+     * Delete health post
+     */
+    public function deleteHealthPost($id) {
+        if (!$this->isPost()) {
+            $this->redirect('/doctor/health-posts');
+        }
+
+        $this->validateCSRF();
+
+        $post = $this->healthPostModel->getPostWithDetails($id);
+
+        if (!$post || $post['doctor_id'] != $this->doctorProfile['id']) {
+            $this->error('المنشور غير موجود أو غير مخول لك');
+        }
+
+        if ($this->healthPostModel->deletePost($id)) {
+            $this->success('تم حذف المنشور بنجاح');
+        } else {
+            $this->error('حدث خطأ أثناء حذف المنشور');
+        }
+    }
+
+    /**
+     * View all approved health posts (public health info)
+     */
+    public function healthInfo() {
+        $page = $this->get('page', 1);
+        $category = $this->get('category', null);
+
+        $posts = $this->healthPostModel->getAllApproved($page, 10, $category);
+        $categories = $this->healthPostModel->getCategories();
+
+        $data = [
+            'title' => 'معلومات صحية',
+            'doctor' => $this->doctorProfile,
+            'posts' => $posts,
+            'categories' => $categories,
+            'selected_category' => $category
+        ];
+
+        $this->renderWithLayout('doctor.health-info', $data, 'doctor');
     }
 }

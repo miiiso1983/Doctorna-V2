@@ -133,6 +133,11 @@ $router->get('/admin/patients', 'AdminController@patients');
 $router->get('/admin/specializations', 'AdminController@specializations');
 $router->get('/admin/appointments', 'AdminController@appointments');
 $router->get('/admin/analytics', 'AdminController@analytics');
+// Health posts management for admin
+$router->get('/admin/health-posts', 'AdminController@healthPosts');
+$router->post('/admin/health-posts/{id}/approve', 'AdminController@approveHealthPost');
+$router->post('/admin/health-posts/{id}/reject', 'AdminController@rejectHealthPost');
+$router->post('/admin/health-posts/{id}/delete', 'AdminController@deleteHealthPost');
 
 // Doctor routes
 $router->get('/doctor', 'DoctorController@index');
@@ -146,6 +151,14 @@ $router->get('/doctor/patients/{id}', 'DoctorController@patientDetails');
 $router->get('/doctor/reviews', 'DoctorController@reviews');
 $router->get('/doctor/analytics', 'DoctorController@analytics');
 $router->get('/doctor/settings', 'DoctorController@settings');
+// Health posts for doctors
+$router->get('/doctor/health-posts', 'DoctorController@healthPosts');
+$router->get('/doctor/health-posts/create', 'DoctorController@createHealthPost');
+$router->post('/doctor/health-posts/create', 'DoctorController@storeHealthPost');
+$router->get('/doctor/health-posts/{id}/edit', 'DoctorController@editHealthPost');
+$router->post('/doctor/health-posts/{id}/edit', 'DoctorController@updateHealthPost');
+$router->post('/doctor/health-posts/{id}/delete', 'DoctorController@deleteHealthPost');
+$router->get('/doctor/health-info', 'DoctorController@healthInfo');
 
 // Patient routes
 $router->get('/patient', 'PatientController@index');
@@ -164,6 +177,8 @@ $router->get('/patient/medical-history', 'PatientController@medicalHistory');
 // Settings
 $router->get('/patient/settings', 'PatientController@settings');
 $router->post('/patient/settings', 'PatientController@updateSettings');
+// Health info for patients
+$router->get('/patient/health-info', 'PatientController@healthInfo');
 
 $router->get('/patient/prescriptions', 'PatientController@prescriptions');
 $router->get('/patient/prescriptions/{id}/print', 'PatientController@printPrescription');
