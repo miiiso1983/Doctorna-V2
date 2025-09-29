@@ -677,6 +677,11 @@ class DoctorController extends Controller {
             $this->redirect('/doctor/health-posts/create');
         }
 
+        // Debug: Log CSRF validation
+        error_log('POST data: ' . print_r($_POST, true));
+        error_log('SESSION tokens: ' . print_r($_SESSION['csrf_tokens'] ?? [], true));
+        error_log('CSRF_TOKEN_NAME: ' . CSRF_TOKEN_NAME);
+
         $this->validateCSRF();
 
         $postData = $this->post();
