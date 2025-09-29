@@ -60,9 +60,9 @@
             <select class="form-select" id="category" name="category">
               <option value="">اختر الفئة (اختياري)</option>
               <?php foreach ($specializations as $spec): ?>
-                <option value="<?= htmlspecialchars($spec['name_ar']) ?>" 
-                        <?= $this->old('category', $post['category']) == $spec['name_ar'] ? 'selected' : '' ?>>
-                  <?= htmlspecialchars($spec['name_ar']) ?>
+                <option value="<?= htmlspecialchars($spec['name']) ?>"
+                        <?= $this->old('category', $post['category']) == $spec['name'] ? 'selected' : '' ?>>
+                  <?= htmlspecialchars($spec['name']) ?>
                 </option>
               <?php endforeach; ?>
             </select>
