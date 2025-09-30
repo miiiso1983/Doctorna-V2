@@ -28,9 +28,76 @@
   <div class="row g-3">
     <div class="col-12 col-lg-7">
       <div class="card mb-3">
-        <div class="card-header">المواعيد المتاحة (قريبًا)</div>
+        <div class="card-header">المواعيد المتاحة</div>
         <div class="card-body">
-          <div class="text-muted">سيُعرض التقويم وخيارات المواعيد هنا.</div>
+          <?php if (empty($available_slots)): ?>
+            <div class="text-muted">لا توجد مواعيد متاحة في الأيام القادمة. يرجى المحاولة لاحقًا.</div>
+          <?php else: ?>
+            <?php
+              $daysMap = [
+                'Sunday'=>'الأحد','Monday'=>'الاثنين','Tuesday'=>'الثلاثاء','Wednesday'=>'الأربعاء',
+                'Thursday'=>'الخميس','Friday'=>'الجمعة','Saturday'=>'السبت'
+              ];
+              $dates = array_keys($available_slots);
+              $firstDate = $dates[0];
+            ?>
+            <div class="row g-2 align-items-center mb-2">
+              <div class="col-auto">
+                <label for="slotDate" class="form-label mb-0">اختر اليوم:</label>
+              </div>
+              <div class="col-auto">
+                <select id="slotDate" class="form-select form-select-sm">
+                  <?php foreach ($dates as $d): $dt = new DateTime($d); $label = ($daysMap[$dt->format('l')] ?? $dt->format('l')) . ' ' . $dt->format('Y-m-d'); ?>
+                    <option value="<?= $d ?>"<?= $d === $firstDate ? ' selected' : '' ?>><?= $label ?></option>
+                  <?php endforeach; ?>
+                </select>
+              </div>
+            </div>
+
+            <div id="slotTimes" class="d-flex flex-wrap gap-2">
+              <?php foreach ($available_slots[$firstDate] as $t): ?>
+                <button type="button" class="btn btn-outline-primary btn-sm slot-btn" data-date="<?= $firstDate ?>" data-time="<?= $t ?>"><?= $t ?></button>
+              <?php endforeach; ?>
+            </div>
+
+            <div class="form-text mt-2">بالنقر على الوقت سيتم تعبئة حقول الحجز تلقائيًا.</div>
+
+            <script>
+              (function(){
+                const slots = <?= json_encode($available_slots) ?>;
+                const slotDate = document.getElementById('slotDate');
+                const slotTimes = document.getElementById('slotTimes');
+                function renderTimes(date){
+                  slotTimes.innerHTML = '';
+                  (slots[date]||[]).forEach(function(t){
+                    const b = document.createElement('button');
+                    b.type = 'button'; b.className = 'btn btn-outline-primary btn-sm slot-btn';
+                    b.dataset.date = date; b.dataset.time = t; b.textContent = t;
+                    b.addEventListener('click', onPick);
+                    slotTimes.appendChild(b);
+                  });
+                  if ((slots[date]||[]).length === 0) {
+                    slotTimes.innerHTML = '<div class="text-muted">لا توجد أوقات متاحة لهذا اليوم.</div>';
+                  }
+                }
+                function onPick(e){
+                  const d = e.currentTarget.dataset.date;
+                  const t = e.currentTarget.dataset.time;
+                  const f = document.getElementById('bookForm');
+                  if (!f) return;
+                  const dateInput = f.querySelector('input[name="appointment_date"]');
+                  const timeInput = f.querySelector('input[name="appointment_time"]');
+                  dateInput && (dateInput.value = d);
+                  timeInput && (timeInput.value = t);
+                  // Scroll to form
+                  f.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                slotDate && slotDate.addEventListener('change', function(){ renderTimes(this.value); });
+                // Initial bind for existing buttons
+                slotTimes.querySelectorAll('.slot-btn').forEach(function(btn){ btn.addEventListener('click', onPick); });
+              })();
+            </script>
+          <?php endif; ?>
         </div>
       </div>
 
