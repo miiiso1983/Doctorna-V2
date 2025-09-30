@@ -190,9 +190,9 @@ class Review extends Model {
                 LEFT JOIN patients pt ON r.patient_id = pt.id
                 LEFT JOIN users p ON pt.user_id = p.id
                 WHERE {$whereClause}
-                ORDER BY r.created_at DESC";
-        
-        return $this->paginate($page, ITEMS_PER_PAGE, $whereClause, $params, 'r.created_at DESC');
+                ORDER BY created_at DESC";
+
+        return $this->paginate($page, ITEMS_PER_PAGE, $whereClause, $params, 'created_at DESC');
     }
     
     /**
