@@ -207,6 +207,22 @@ $router->get('/api/appointments', 'ApiController@appointments');
 $router->get('/api/appointments/{id}', 'ApiController@getAppointment');
 $router->put('/api/appointments/{id}', 'ApiController@updateAppointment');
 
+// Reviews API
+$router->post('/api/reviews', 'ApiController@createReview');
+$router->get('/api/doctors/{id}/reviews', 'ApiController@doctorReviews');
+$router->get('/api/reviews/{id}', 'ApiController@getReviewById');
+$router->put('/api/reviews/{id}', 'ApiController@updateReview');
+$router->delete('/api/reviews/{id}', 'ApiController@deleteReview');
+
+// Health Posts API
+$router->get('/api/health-posts', 'ApiController@healthPosts');
+$router->get('/api/health-posts/{id}', 'ApiController@healthPostDetails');
+$router->post('/api/health-posts', 'ApiController@createHealthPost');
+$router->put('/api/health-posts/{id}', 'ApiController@updateHealthPost');
+$router->delete('/api/health-posts/{id}', 'ApiController@deleteHealthPost');
+$router->get('/api/doctors/{id}/health-posts', 'ApiController@doctorHealthPosts');
+
+
 // AJAX routes
 $router->post('/ajax/appointment/accept', 'AjaxController@acceptAppointment');
 $router->post('/ajax/appointment/reject', 'AjaxController@rejectAppointment');

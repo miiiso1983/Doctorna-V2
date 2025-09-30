@@ -10,6 +10,7 @@ require_once APP_PATH . '/models/Doctor.php';
 require_once APP_PATH . '/models/Patient.php';
 require_once APP_PATH . '/models/Appointment.php';
 require_once APP_PATH . '/models/Specialization.php';
+require_once APP_PATH . '/models/HealthPost.php';
 
 class ApiController extends Controller {
     private $userModel;
@@ -637,5 +638,345 @@ class ApiController extends Controller {
             $this->apiError('Failed to retrieve specializations', 500);
         }
     }
+
+    // ----- Reviews API -----
+
+    /**
+     * Create a new review (Patients only)
+     * POST /api/reviews
+     */
+    public function createReview() {
+        if (!$this->isPost()) {
+            $this->apiError('Method not allowed', 405);
+        }
+        $user = $this->requireApiAuth();
+        if ($user['role'] !== ROLE_PATIENT) {
+            $this->apiError('Only patients can create reviews', 403);
+        }
+
+        $appointmentId = (int)$this->post('appointment_id');
+        $doctorId = (int)$this->post('doctor_id');
+        $rating = (int)$this->post('rating');
+        $reviewText = trim((string)$this->post('review', ''));
+        $isAnonymous = (bool)$this->post('is_anonymous', false);
+
+        if (!$appointmentId || !$doctorId || !$rating) {
+            $this->apiError('Appointment ID, Doctor ID and rating are required', 422);
+        }
+        if ($rating < 1 || $rating > 5) {
+            $this->apiError('Rating must be between 1 and 5', 422);
+        }
+
+        // Get patient by user
+        $patient = $this->patientModel->getByUserId($user['id']);
+        if (!$patient) {
+            $this->apiError('Patient profile not found', 404);
+        }
+
+        // Verify patient has a completed appointment with doctor
+        $hasCompleted = $this->appointmentModel->exists(
+            'patient_id = :p AND doctor_id = :d AND status = :s',
+            ['p' => (int)$patient['id'], 'd' => $doctorId, 's' => APPOINTMENT_COMPLETED]
+        );
+        if (!$hasCompleted) {
+            $this->apiError('You can only review after a completed appointment', 403);
+        }
+
+        // Create review
+        $reviewModel = new Review();
+        $created = $reviewModel->createReview([
+            'appointment_id' => $appointmentId,
+            'patient_id' => (int)$patient['id'],
+            'doctor_id' => $doctorId,
+            'rating' => $rating,
+            'review' => $reviewText,
+            'is_anonymous' => $isAnonymous ? 1 : 0,
+            'is_approved' => 0 // pending
+        ]);
+
+        if (!$created) {
+            $this->apiError('Review already exists for this appointment', 400);
+        }
+
+        // Update doctor rating aggregates
+        $this->doctorModel->updateRating($doctorId);
+
+        $this->apiSuccess('Review created successfully', [
+            'review' => $created
+        ], 201);
+    }
+
+    /**
+     * Get reviews for a doctor with statistics
+     * GET /api/doctors/{id}/reviews
+     */
+    public function doctorReviews($id) {
+        $doctorId = (int)$id;
+        if (!$doctorId) { $this->apiError('Doctor ID is required', 422); }
+        $page = (int)$this->get('page', 1);
+
+        $reviewModel = new Review();
+        $reviews = $reviewModel->getDoctorReviews($doctorId, true, $page);
+        $stats = $reviewModel->getDoctorReviewStats($doctorId);
+
+        $this->apiSuccess('Doctor reviews retrieved', [
+            'reviews' => $reviews,
+            'statistics' => $stats
+        ]);
+    }
+
+    /**
+     * Get a single review by ID
+     * GET /api/reviews/{id}
+     */
+    public function getReviewById($id) {
+        $reviewId = (int)$id;
+        $reviewModel = new Review();
+        $review = $reviewModel->find($reviewId);
+        if (!$review) { $this->apiError('Review not found', 404); }
+        $this->apiSuccess('Review retrieved', ['review' => $review]);
+    }
+
+    /**
+     * Update a review (owner patient only)
+     * PUT /api/reviews/{id}
+     */
+    public function updateReview($id) {
+        if (!$this->isPut()) {
+            $this->apiError('Method not allowed', 405);
+        }
+        $user = $this->requireApiAuth();
+        if ($user['role'] !== ROLE_PATIENT) {
+            $this->apiError('Only patients can update reviews', 403);
+        }
+
+        $reviewId = (int)$id;
+        $reviewModel = new Review();
+        $review = $reviewModel->find($reviewId);
+        if (!$review) { $this->apiError('Review not found', 404); }
+
+        // Ownership check
+        $patient = $this->patientModel->getByUserId($user['id']);
+        if (!$patient || (int)$review['patient_id'] !== (int)$patient['id']) {
+            $this->apiError('Forbidden', 403);
+        }
+
+        $data = $this->getJsonInput();
+        $update = [];
+        if (isset($data['rating'])) {
+            $r = (int)$data['rating'];
+            if ($r < 1 || $r > 5) { $this->apiError('Rating must be between 1 and 5', 422); }
+            $update['rating'] = $r;
+        }
+        if (isset($data['review'])) { $update['review'] = trim((string)$data['review']); }
+
+        if (empty($update)) {
+            $this->apiError('Nothing to update', 400);
+        }
+
+        $reviewModel->update($reviewId, $update);
+        // Update doctor rating aggregates
+        $this->doctorModel->updateRating((int)$review['doctor_id']);
+
+        $this->apiSuccess('Review updated', ['review' => $reviewModel->find($reviewId)]);
+    }
+
+    /**
+     * Delete a review (owner patient or super admin)
+     * DELETE /api/reviews/{id}
+     */
+    public function deleteReview($id) {
+        $user = $this->requireApiAuth();
+        $reviewId = (int)$id;
+        $reviewModel = new Review();
+        $review = $reviewModel->find($reviewId);
+        if (!$review) { $this->apiError('Review not found', 404); }
+
+        $authorized = false;
+        if ($user['role'] === ROLE_SUPER_ADMIN) {
+            $authorized = true;
+        } elseif ($user['role'] === ROLE_PATIENT) {
+            $patient = $this->patientModel->getByUserId($user['id']);
+            if ($patient && (int)$review['patient_id'] === (int)$patient['id']) {
+                $authorized = true;
+            }
+        }
+        if (!$authorized) { $this->apiError('Forbidden', 403); }
+
+        $reviewModel->delete($reviewId);
+        // Update doctor rating aggregates
+        $this->doctorModel->updateRating((int)$review['doctor_id']);
+
+        $this->apiSuccess('Review deleted');
+    }
+
+    // ----- Health Posts API -----
+
+    /**
+     * List approved health posts (public)
+     * GET /api/health-posts
+     */
+    public function healthPosts() {
+        $page = (int)$this->get('page', 1);
+        $perPage = (int)$this->get('per_page', 10);
+        $category = $this->get('category');
+
+        $model = new HealthPost();
+        $posts = $model->getAllApproved($page, $perPage, $category ?: null);
+        $this->apiSuccess('Health posts retrieved', $posts);
+    }
+
+    /**
+     * Get a health post details (approved only unless owner/admin)
+     * GET /api/health-posts/{id}
+     */
+    public function healthPostDetails($id) {
+        $postId = (int)$id;
+        $model = new HealthPost();
+        $post = $model->getPostWithDetails($postId);
+        if (!$post) { $this->apiError('Post not found', 404); }
+
+        if (($post['status'] ?? 'pending') !== 'approved') {
+            // Allow only owner doctor or super admin to view non-approved
+            $user = $this->requireApiAuth();
+            if ($user['role'] === ROLE_SUPER_ADMIN) {
+                // ok
+            } elseif ($user['role'] === ROLE_DOCTOR) {
+                $doctor = $this->doctorModel->getByUserId($user['id']);
+                if (!$doctor || (int)$doctor['id'] !== (int)$post['doctor_id']) {
+                    $this->apiError('Forbidden', 403);
+                }
+            } else {
+                $this->apiError('Forbidden', 403);
+            }
+        }
+
+        $this->apiSuccess('Post retrieved', ['post' => $post]);
+    }
+
+    /**
+     * Create a health post (Doctor only)
+     * POST /api/health-posts
+     */
+    public function createHealthPost() {
+        if (!$this->isPost()) { $this->apiError('Method not allowed', 405); }
+        $user = $this->requireApiAuth();
+        if ($user['role'] !== ROLE_DOCTOR) { $this->apiError('Only doctors can create posts', 403); }
+
+        $doctor = $this->doctorModel->getByUserId($user['id']);
+        if (!$doctor) { $this->apiError('Doctor profile not found', 404); }
+
+        $title = trim((string)$this->post('title'));
+        $content = trim((string)$this->post('content'));
+        $category = trim((string)$this->post('category', '')) ?: null;
+
+        if (!$title || !$content) {
+            $this->apiError('Title and content are required', 422);
+        }
+
+        $imagePath = null;
+        if (!empty($_FILES['image']['name'])) {
+            $imagePath = $this->uploadFile($_FILES['image'], 'uploads/health-posts', ['jpg','jpeg','png','webp']);
+        }
+
+        $model = new HealthPost();
+        $ok = $model->createPost([
+            'doctor_id' => (int)$doctor['id'],
+            'title' => $title,
+            'content' => $content,
+            'image_path' => $imagePath,
+            'category' => $category,
+            'status' => 'pending' // requires admin approval
+        ]);
+
+        if ($ok === false) {
+            $this->apiError('Failed to create post', 500);
+        }
+
+        $this->apiSuccess('Post created and pending approval');
+    }
+
+    /**
+     * Update a health post (owner doctor only or super admin)
+     * PUT /api/health-posts/{id}
+     */
+    public function updateHealthPost($id) {
+        if (!$this->isPut()) { $this->apiError('Method not allowed', 405); }
+        $user = $this->requireApiAuth();
+        $postId = (int)$id;
+
+        $model = new HealthPost();
+        $post = $model->find($postId);
+        if (!$post) { $this->apiError('Post not found', 404); }
+
+        $authorized = false;
+        if ($user['role'] === ROLE_SUPER_ADMIN) {
+            $authorized = true;
+        } elseif ($user['role'] === ROLE_DOCTOR) {
+            $doctor = $this->doctorModel->getByUserId($user['id']);
+            if ($doctor && (int)$doctor['id'] === (int)$post['doctor_id']) { $authorized = true; }
+        }
+        if (!$authorized) { $this->apiError('Forbidden', 403); }
+
+        $data = $this->getJsonInput();
+        $update = [];
+        if (isset($data['title'])) { $update['title'] = trim((string)$data['title']); }
+        if (isset($data['content'])) { $update['content'] = trim((string)$data['content']); }
+        if (isset($data['category'])) { $update['category'] = trim((string)$data['category']) ?: null; }
+
+        // Support optional file upload via multipart (if request came as POST override)
+        if (!empty($_FILES['image']['name'])) {
+            $imagePath = $this->uploadFile($_FILES['image'], 'uploads/health-posts', ['jpg','jpeg','png','webp']);
+            if ($imagePath) { $update['image_path'] = $imagePath; }
+        }
+
+        if (empty($update)) { $this->apiError('Nothing to update', 400); }
+
+        $model->updatePost($postId, $update);
+        $this->apiSuccess('Post updated', ['post' => $model->getPostWithDetails($postId)]);
+    }
+
+    /**
+     * Delete a health post (owner doctor or super admin)
+     * DELETE /api/health-posts/{id}
+     */
+    public function deleteHealthPost($id) {
+        $user = $this->requireApiAuth();
+        $postId = (int)$id;
+        $model = new HealthPost();
+        $post = $model->find($postId);
+        if (!$post) { $this->apiError('Post not found', 404); }
+
+        $authorized = false;
+        if ($user['role'] === ROLE_SUPER_ADMIN) {
+            $authorized = true;
+        } elseif ($user['role'] === ROLE_DOCTOR) {
+            $doctor = $this->doctorModel->getByUserId($user['id']);
+            if ($doctor && (int)$doctor['id'] === (int)$post['doctor_id']) { $authorized = true; }
+        }
+        if (!$authorized) { $this->apiError('Forbidden', 403); }
+
+        $model->deletePost($postId);
+        $this->apiSuccess('Post deleted');
+    }
+
+    /**
+     * List approved posts for a specific doctor (public)
+     * GET /api/doctors/{id}/health-posts
+     */
+    public function doctorHealthPosts($id) {
+        $doctorId = (int)$id;
+        if (!$doctorId) { $this->apiError('Doctor ID is required', 422); }
+        $page = (int)$this->get('page', 1);
+        $perPage = (int)$this->get('per_page', 10);
+
+        $model = new HealthPost();
+        $result = $model->getByDoctor($doctorId, $page, $perPage);
+        // Filter only approved for public endpoint
+        $result['data'] = array_values(array_filter($result['data'], function($p){ return ($p['status'] ?? 'pending') === 'approved'; }));
+        $this->apiSuccess('Doctor health posts retrieved', $result);
+    }
+
+
 
 }

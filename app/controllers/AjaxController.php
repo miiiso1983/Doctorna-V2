@@ -114,9 +114,159 @@ class AjaxController extends Controller {
         ]);
     }
 
-    // Stubs for endpoints referenced in routes; implement as needed
-    public function acceptAppointment() { return $this->error('غير مُنفّذ', 501); }
-    public function rejectAppointment() { return $this->error('غير مُنفّذ', 501); }
-    public function checkAvailability() { return $this->error('غير مُنفّذ', 501); }
+    // ----- Appointments: accept/reject/check availability -----
+
+    /**
+     * Accept appointment (Doctor only)
+     * POST /ajax/appointment/accept
+     */
+    public function acceptAppointment() {
+        if (!$this->isPost()) {
+            return $this->error('طريقة الطلب غير صحيحة', 405);
+        }
+        $this->validateCSRF();
+        // Require doctor role (returns JSON error for AJAX if unauthorized)
+        $this->requireRole(ROLE_DOCTOR);
+
+        $appointmentId = (int)$this->post('appointment_id');
+        if (!$appointmentId) {
+            return $this->error('رقم الموعد مطلوب', 422);
+        }
+
+        require_once APP_PATH . '/models/Appointment.php';
+        require_once APP_PATH . '/models/Doctor.php';
+        require_once APP_PATH . '/models/Patient.php';
+        require_once APP_PATH . '/models/Notification.php';
+
+        $appointmentModel = new Appointment();
+        $doctorModel = new Doctor();
+        $patientModel = new Patient();
+        $notificationModel = new Notification();
+
+        // Current doctor by user
+        $userId = $this->auth->id();
+        $doctor = $doctorModel->getByUserId($userId);
+        if (!$doctor) {
+            return $this->error('حساب الطبيب غير موجود', 404);
+        }
+
+        // Verify appointment belongs to this doctor
+        $appointment = $appointmentModel->getAppointmentDetails($appointmentId);
+        if (!$appointment || (int)$appointment['doctor_id'] !== (int)$doctor['id']) {
+            return $this->error('الموعد غير موجود أو غير مخول لك', 403);
+        }
+
+        if ($appointmentModel->updateStatus($appointmentId, APPOINTMENT_CONFIRMED)) {
+            // Notify patient
+            $patient = $patientModel->find((int)$appointment['patient_id']);
+            if ($patient && !empty($patient['user_id'])) {
+                $notificationModel->createNotification(
+                    (int)$patient['user_id'],
+                    'appointment_confirmed',
+                    'تم قبول موعدك',
+                    'تم قبول موعدك مع الطبيب ' . ($appointment['doctor_name'] ?? ''),
+                    ['appointment_id' => $appointmentId]
+                );
+            }
+            return $this->success('تم قبول الموعد بنجاح');
+        }
+
+        return $this->error('حدث خطأ أثناء قبول الموعد', 500);
+    }
+
+    /**
+     * Reject appointment (Doctor only)
+     * POST /ajax/appointment/reject
+     */
+    public function rejectAppointment() {
+        if (!$this->isPost()) {
+            return $this->error('طريقة الطلب غير صحيحة', 405);
+        }
+        $this->validateCSRF();
+        $this->requireRole(ROLE_DOCTOR);
+
+        $appointmentId = (int)$this->post('appointment_id');
+        $reason = trim((string)$this->post('reason', ''));
+        if (!$appointmentId) {
+            return $this->error('رقم الموعد مطلوب', 422);
+        }
+
+        require_once APP_PATH . '/models/Appointment.php';
+        require_once APP_PATH . '/models/Doctor.php';
+        require_once APP_PATH . '/models/Patient.php';
+        require_once APP_PATH . '/models/Notification.php';
+
+        $appointmentModel = new Appointment();
+        $doctorModel = new Doctor();
+        $patientModel = new Patient();
+        $notificationModel = new Notification();
+
+        $userId = $this->auth->id();
+        $doctor = $doctorModel->getByUserId($userId);
+        if (!$doctor) {
+            return $this->error('حساب الطبيب غير موجود', 404);
+        }
+
+        $appointment = $appointmentModel->getAppointmentDetails($appointmentId);
+        if (!$appointment || (int)$appointment['doctor_id'] !== (int)$doctor['id']) {
+            return $this->error('الموعد غير موجود أو غير مخول لك', 403);
+        }
+
+        if ($appointmentModel->updateStatus($appointmentId, APPOINTMENT_CANCELLED, $reason ?: null)) {
+            // Notify patient
+            $patient = $patientModel->find((int)$appointment['patient_id']);
+            if ($patient && !empty($patient['user_id'])) {
+                $notificationModel->createNotification(
+                    (int)$patient['user_id'],
+                    'appointment_rejected',
+                    'تم رفض الموعد',
+                    ($reason ? ('السبب: ' . $reason) : 'تم رفض الموعد من قبل الطبيب'),
+                    ['appointment_id' => $appointmentId]
+                );
+            }
+            return $this->success('تم رفض الموعد');
+        }
+
+        return $this->error('حدث خطأ أثناء رفض الموعد', 500);
+    }
+
+    /**
+     * Check doctor availability or list available slots
+     * POST /ajax/doctor/availability
+     * params: doctor_id, date (Y-m-d), [time (H:i or H:i:s)]
+     */
+    public function checkAvailability() {
+        // Allow GET or POST
+        $doctorId = (int)($this->post('doctor_id') ?: $this->get('doctor_id'));
+        $date = $this->post('date') ?: $this->get('date');
+        $time = $this->post('time') ?: $this->get('time');
+
+        if (!$doctorId || !$date) {
+            return $this->error('معرّف الطبيب والتاريخ مطلوبان', 422);
+        }
+
+        require_once APP_PATH . '/models/Doctor.php';
+        $doctorModel = new Doctor();
+
+        // If time provided, return a boolean availability; else return slots
+        if ($time) {
+            // Normalize time to H:i:s
+            $t = date('H:i:s', strtotime($time));
+            $slots = $doctorModel->getAvailableSlots($doctorId, $date);
+            $available = in_array($t, $slots, true);
+            return $this->success('التحقق من التوفر', [
+                'available' => $available,
+                'time' => $t,
+                'date' => $date
+            ]);
+        }
+
+        $slots = $doctorModel->getAvailableSlots($doctorId, $date);
+        return $this->success('الأوقات المتاحة', [
+            'date' => $date,
+            'slots' => array_values($slots)
+        ]);
+    }
 }
+
 
