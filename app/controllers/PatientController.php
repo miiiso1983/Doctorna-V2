@@ -240,8 +240,8 @@ class PatientController extends Controller {
     /**
      * View doctor profile
      */
-    public function viewDoctor() {
-        $doctorId = $this->get('id');
+    public function viewDoctor($id = null) {
+        $doctorId = $id ?? $this->get('id');
 
         if (!$doctorId) {
             $this->flash('error', 'معرف الطبيب مطلوب');
