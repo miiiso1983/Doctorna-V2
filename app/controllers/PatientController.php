@@ -310,8 +310,10 @@ class PatientController extends Controller {
             $this->error('الطبيب غير متاح');
         }
 
+        // Normalize time to H:i:s (input <time> often sends H:i)
+        $normalizedTime = strlen($data['appointment_time']) === 5 ? ($data['appointment_time'] . ':00') : $data['appointment_time'];
         // Check if time slot is available
-        if (!$this->isTimeSlotAvailable($data['doctor_id'], $data['appointment_date'], $data['appointment_time'])) {
+        if (!$this->isTimeSlotAvailable($data['doctor_id'], $data['appointment_date'], $normalizedTime)) {
             $this->error('الموعد المحدد غير متاح');
         }
 
@@ -331,7 +333,7 @@ class PatientController extends Controller {
                 'patient_id' => $this->patientProfile['id'],
                 'doctor_id' => $data['doctor_id'],
                 'appointment_date' => $data['appointment_date'],
-                'appointment_time' => $data['appointment_time'],
+                'appointment_time' => $normalizedTime,
                 'symptoms' => $data['symptoms'],
                 'notes' => $data['notes'] ?? '',
                 'status' => APPOINTMENT_PENDING,
@@ -637,8 +639,10 @@ class PatientController extends Controller {
      * Check if time slot is available
      */
     private function isTimeSlotAvailable($doctorId, $date, $time) {
+        // Normalize to H:i:s to match generated slots
+        $timeNorm = (strlen($time) === 5) ? ($time . ':00') : $time;
         $availableSlots = $this->getAvailableTimeSlots($doctorId);
-        return isset($availableSlots[$date]) && in_array($time, $availableSlots[$date]);
+        return isset($availableSlots[$date]) && in_array($timeNorm, $availableSlots[$date], true);
     }
 
     /**
