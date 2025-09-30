@@ -16,8 +16,10 @@
             <div class="mb-2"><strong>البريد:</strong> <?= $this->escape($appointment['patient_email'] ?? '—') ?></div>
           </div>
           <div class="col-md-6">
-            <div class="mb-2"><strong>التاريخ:</strong> <?= $this->formatArabicDate($appointment['appointment_date']) ?></div>
-            <div class="mb-2"><strong>الوقت:</strong> <?= date('h:i A', strtotime($appointment['appointment_time'])) ?></div>
+          </div>
+        </div>
+        <?php
+            ?>
             <div class="mb-2"><strong>الحالة:</strong> <span class="badge bg-<?= $this->getStatusBadge($appointment['status']) ?>"><?= $this->getStatusText($appointment['status']) ?></span></div>
           </div>
         </div>
@@ -86,4 +88,6 @@
     </div>
   </div>
 </div>
+<?php
+?>
 

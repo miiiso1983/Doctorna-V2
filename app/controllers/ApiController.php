@@ -636,7 +636,11 @@ class ApiController extends Controller {
      */
     public function specializations() {
         try {
-            $specializations = $this->specializationModel->getActiveSpecializations();
+
+            $specializations = $this->specializationModel->all();
+
+                   
+
             $this->apiSuccess('Specializations retrieved', ['specializations' => $specializations]);
         } catch (Exception $e) {
             $this->apiError('Failed to retrieve specializations', 500);
