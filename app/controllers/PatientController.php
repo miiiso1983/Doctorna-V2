@@ -310,10 +310,11 @@ class PatientController extends Controller {
             $this->error('الطبيب غير متاح');
         }
 
-        // Normalize time to H:i:s (input <time> often sends H:i)
-        $normalizedTime = strlen($data['appointment_time']) === 5 ? ($data['appointment_time'] . ':00') : $data['appointment_time'];
+        // Normalize for check/save
+        $timeKey = substr($data['appointment_time'], 0, 5); // H:i
+        $normalizedTime = strlen($timeKey) === 5 ? ($timeKey . ':00') : $data['appointment_time']; // H:i:s for DB
         // Check if time slot is available
-        if (!$this->isTimeSlotAvailable($data['doctor_id'], $data['appointment_date'], $normalizedTime)) {
+        if (!$this->isTimeSlotAvailable($data['doctor_id'], $data['appointment_date'], $timeKey)) {
             $this->error('الموعد المحدد غير متاح');
         }
 
@@ -552,15 +553,20 @@ class PatientController extends Controller {
      */
     private function getAvailableTimeSlots($doctorId) {
         $slots = [];
-        $schedule = $this->doctorModel->getSchedule($doctorId);
+        $rows = $this->doctorModel->getSchedule($doctorId); // array of rows with day_of_week, start_time, end_time, break_*, is_available
+        // Map schedule by day name (sunday..saturday)
+        $schedule = [];
+        foreach ($rows as $r) {
+            $schedule[strtolower($r['day_of_week'])] = $r;
+        }
 
         // Generate slots for next 30 days
         for ($i = 0; $i < 30; $i++) {
             $date = date('Y-m-d', strtotime("+{$i} days"));
-            $dayOfWeek = date('w', strtotime($date));
+            $dayName = strtolower(date('l', strtotime($date))); // e.g., thursday
 
-            if (isset($schedule[$dayOfWeek]) && $schedule[$dayOfWeek]['is_available']) {
-                $daySchedule = $schedule[$dayOfWeek];
+            if (isset($schedule[$dayName]) && (int)($schedule[$dayName]['is_available'] ?? 0) === 1) {
+                $daySchedule = $schedule[$dayName];
                 $timeSlots = $this->generateTimeSlots(
                     $daySchedule['start_time'],
                     $daySchedule['end_time'],
@@ -613,11 +619,15 @@ class PatientController extends Controller {
      */
     private function filterBookedSlots($doctorId, $date, $timeSlots) {
         $bookedSlots = $this->appointmentModel->getBookedSlots($doctorId, $date);
-        $bookedTimes = array_column($bookedSlots, 'appointment_time');
+        // Normalize booked times to H:i for comparison
+        $bookedTimes = array_map(function($row){
+            $t = is_array($row) ? ($row['appointment_time'] ?? '') : $row;
+            return substr((string)$t, 0, 5);
+        }, $bookedSlots);
 
-        return array_filter($timeSlots, function($slot) use ($bookedTimes) {
-            return !in_array($slot, $bookedTimes);
-        });
+        return array_values(array_filter($timeSlots, function($slot) use ($bookedTimes) {
+            return !in_array($slot, $bookedTimes, true);
+        }));
     }
 
     /**
@@ -639,10 +649,10 @@ class PatientController extends Controller {
      * Check if time slot is available
      */
     private function isTimeSlotAvailable($doctorId, $date, $time) {
-        // Normalize to H:i:s to match generated slots
-        $timeNorm = (strlen($time) === 5) ? ($time . ':00') : $time;
+        // Compare using H:i
+        $timeKey = substr($time, 0, 5);
         $availableSlots = $this->getAvailableTimeSlots($doctorId);
-        return isset($availableSlots[$date]) && in_array($timeNorm, $availableSlots[$date], true);
+        return isset($availableSlots[$date]) && in_array($timeKey, $availableSlots[$date], true);
     }
 
     /**
