@@ -376,6 +376,17 @@
       window.Doctorna.user = { id: <?= (int)$this->user()['id'] ?>, role: 'patient' };
     </script>
 
+    <script>
+      window.Doctorna = window.Doctorna || {};
+      window.Doctorna.realtimeConfig = {
+        driver: '<?= addslashes(REALTIME_DRIVER) ?>',
+        appKey: '<?= addslashes(REALTIME_APP_KEY) ?>',
+        cluster: '<?= addslashes(REALTIME_CLUSTER) ?>',
+        wsUrl: '<?= addslashes(REALTIME_WS_URL) ?>'
+      };
+    </script>
+
+
     <!-- Custom JS -->
     <script src="<?= $this->asset('js/app.js') ?>"></script>
     <script src="<?= $this->asset('js/dynamic-features.js') ?>"></script>

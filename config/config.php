@@ -67,6 +67,15 @@ define('QI_MODE', $_ENV['QI_MODE'] ?? 'test');
 define('PAYMENT_RETURN_URL', rtrim($_ENV['PAYMENT_RETURN_URL'] ?? (APP_URL . '/payment/return'), '/'));
 define('PAYMENT_CALLBACK_URL', rtrim($_ENV['PAYMENT_CALLBACK_URL'] ?? (APP_URL . '/api/payments/webhook'), '/'));
 
+
+// Realtime configuration (provider-agnostic)
+// Options: none | pusher | ably | native
+define('REALTIME_DRIVER', $_ENV['REALTIME_DRIVER'] ?? 'none');
+define('REALTIME_APP_KEY', $_ENV['REALTIME_APP_KEY'] ?? '');
+define('REALTIME_CLUSTER', $_ENV['REALTIME_CLUSTER'] ?? '');
+// For native/self-hosted WS (e.g., wss://ws.example.com)
+define('REALTIME_WS_URL', $_ENV['REALTIME_WS_URL'] ?? '');
+
 // Set timezone
 date_default_timezone_set(APP_TIMEZONE);
 
@@ -144,7 +153,7 @@ set_error_handler(function($severity, $message, $file, $line) {
     if (!(error_reporting() & $severity)) {
         return false;
     }
-    
+
     $error = [
         'severity' => $severity,
         'message' => $message,
@@ -152,16 +161,16 @@ set_error_handler(function($severity, $message, $file, $line) {
         'line' => $line,
         'timestamp' => date('Y-m-d H:i:s')
     ];
-    
+
     // Log error
     error_log(json_encode($error), 3, ROOT_PATH . '/' . LOG_FILE);
-    
+
     if (APP_DEBUG) {
         echo "<div style='background: #f8d7da; color: #721c24; padding: 10px; margin: 10px; border: 1px solid #f5c6cb; border-radius: 4px;'>";
         echo "<strong>Error:</strong> {$message} in <strong>{$file}</strong> on line <strong>{$line}</strong>";
         echo "</div>";
     }
-    
+
     return true;
 });
 

@@ -489,3 +489,58 @@ Doctorna.video = (function(){
     }
   };
 })();
+
+
+// Realtime client (scaffold)
+Doctorna.realtime = (function(){
+  const cfg = (window.Doctorna && window.Doctorna.realtimeConfig) || { driver:'none' };
+  let connected = false;
+  let ws;
+  const listeners = {};
+  function on(event, cb){ (listeners[event] = listeners[event] || []).push(cb); }
+  function emit(event, payload){ (listeners[event]||[]).forEach(cb=>cb(payload)); }
+  function connectIfPossible(){
+    if (cfg.driver === 'native' && cfg.wsUrl && window.WebSocket) {
+      try {
+        ws = new WebSocket(cfg.wsUrl);
+        ws.onopen = ()=>{ connected = true; /* Optionally subscribe: user-<id> */ };
+        ws.onmessage = (m)=>{ try { const msg = JSON.parse(m.data); emit(msg.event, msg.data); } catch(e){} };
+        ws.onclose = ()=>{ connected = false; };
+      } catch(e) { /* ignore */ }
+    }
+    // Other drivers (pusher/ably) can be added later without changing callers
+  }
+  connectIfPossible();
+  return {
+    isEnabled: function(){ return cfg.driver !== 'none'; },
+    on: on,
+    emitLocal: emit // local emit for in-page cooperation if needed
+  };
+})();
+
+// Hook realtime chat updates (if enabled)
+(function(){
+  if (!Doctorna.realtime || !Doctorna.realtime.isEnabled()) return;
+  Doctorna.realtime.on('chat_message', function(data){
+    // If chat modal is open for the same appointment, reload
+    try {
+      const apptId = document.getElementById('chatAppointmentId')?.value;
+      if (apptId && Number(apptId) === Number(data.appointment_id)) {
+        if (Doctorna.chat) { Doctorna.chat.open(apptId); }
+      } else {
+        Doctorna.utils && Doctorna.utils.showToast && Doctorna.utils.showToast('رسالة دردشة جديدة', 'info');
+      }
+    } catch(e){}
+  });
+  Doctorna.realtime.on('video_room', function(data){
+    // If video modal open for the same appointment, refresh info
+    try {
+      if (Doctorna.video && data && data.appointment_id) {
+        Doctorna.video.open(Number(data.appointment_id));
+      }
+    } catch(e){}
+  });
+  Doctorna.realtime.on('video_status', function(data){
+    // Optional UI indicator
+  });
+})();

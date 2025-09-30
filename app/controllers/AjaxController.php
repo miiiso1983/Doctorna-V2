@@ -195,6 +195,7 @@ class AjaxController extends Controller {
         require_once APP_PATH . '/models/Doctor.php';
         require_once APP_PATH . '/models/Patient.php';
         require_once APP_PATH . '/models/Notification.php';
+        require_once APP_PATH . '/services/Realtime.php';
 
         $appointmentModel = new Appointment();
         $doctorModel = new Doctor();
@@ -320,6 +321,7 @@ class AjaxController extends Controller {
         require_once APP_PATH . '/models/Notification.php';
         require_once APP_PATH . '/models/Doctor.php';
         require_once APP_PATH . '/models/Patient.php';
+        require_once APP_PATH . '/services/Realtime.php';
 
         $appointmentId = (int)$this->post('appointment_id');
         $message = trim((string)$this->post('message'));
@@ -335,11 +337,11 @@ class AjaxController extends Controller {
         if ($user['role'] === ROLE_PATIENT) {
             $patient = $patientModel->getByUserId($user['id']);
             if (!$patient || (int)$patient['id'] !== (int)$appt['patient_id']) { return $this->error('غير مصرح', 403); }
-            $recipientUserId = (int)($this->doctorModel->find((int)$appt['doctor_id'])['user_id'] ?? 0);
+            $recipientUserId = (int)($doctorModel->find((int)$appt['doctor_id'])['user_id'] ?? 0);
         } elseif ($user['role'] === ROLE_DOCTOR) {
             $doctor = $doctorModel->getByUserId($user['id']);
             if (!$doctor || (int)$doctor['id'] !== (int)$appt['doctor_id']) { return $this->error('غير مصرح', 403); }
-            $recipientUserId = (int)($this->patientModel->find((int)$appt['patient_id'])['user_id'] ?? 0);
+            $recipientUserId = (int)($patientModel->find((int)$appt['patient_id'])['user_id'] ?? 0);
         } else { return $this->error('غير مصرح', 403); }
         if (!$recipientUserId) { return $this->error('تعذر تحديد المستلم', 404); }
 
@@ -354,6 +356,15 @@ class AjaxController extends Controller {
 
         $notif = new Notification();
         $notif->createNotification($recipientUserId, 'chat_message', 'رسالة جديدة', 'لديك رسالة جديدة بخصوص الموعد #'.$appointmentId, ['appointment_id' => $appointmentId]);
+        // Realtime push (no-op if REALTIME_DRIVER=none)
+        $rt = new Realtime();
+        $rt->publish('user-' . $recipientUserId, 'chat_message', [
+            'appointment_id' => (int)$appointmentId,
+            'sender_user_id' => (int)$user['id'],
+            'recipient_user_id' => (int)$recipientUserId,
+            'message' => $message,
+            'created_at' => date('Y-m-d H:i:s')
+        ]);
         return $this->success('تم الإرسال', ['message_id' => (int)$msgId]);
     }
 
@@ -383,6 +394,7 @@ class AjaxController extends Controller {
         require_once APP_PATH . '/models/Notification.php';
         require_once APP_PATH . '/models/Doctor.php';
         require_once APP_PATH . '/models/Patient.php';
+        require_once APP_PATH . '/services/Realtime.php';
 
         $appointmentId = (int)$this->post('appointment_id');
         if (!$appointmentId) { return $this->error('رقم الموعد مطلوب', 422); }
@@ -422,6 +434,18 @@ class AjaxController extends Controller {
             $n = new Notification();
             $n->createNotification($recipientUserId, 'video_call', 'دعوة مكالمة فيديو', 'هناك مكالمة فيديو للموعد #'.$appointmentId, ['appointment_id'=>$appointmentId,'room_code'=>$roomCode]);
         }
+        // Realtime push to counterpart and appointment channel
+        $rt = new Realtime();
+        $rt->publish('user-' . ($recipientUserId ?: (int)$user['id']), 'video_room', [
+            'appointment_id' => (int)$appointmentId,
+            'room_code' => $roomCode,
+            'status' => 'scheduled'
+        ]);
+        $rt->publish('appointment-' . (int)$appointmentId, 'video_room', [
+            'appointment_id' => (int)$appointmentId,
+            'room_code' => $roomCode,
+            'status' => 'scheduled'
+        ]);
 
         return $this->success('تم الإنشاء', ['room' => $vc->find($roomId)]);
     }
@@ -446,6 +470,7 @@ class AjaxController extends Controller {
         $this->validateCSRF();
         $this->requireAuth();
         require_once APP_PATH . '/models/VideoCall.php';
+        require_once APP_PATH . '/services/Realtime.php';
         $status = strtolower(trim((string)$this->post('status','')));
         $vc = new VideoCall();
         $room = $vc->findByAppointment((int)$appointmentId);
@@ -453,6 +478,12 @@ class AjaxController extends Controller {
         if ($status === 'ongoing') { $vc->markStarted((int)$room['id']); }
         elseif (in_array($status, ['ended','cancelled'])) { $vc->markEnded((int)$room['id']); }
         else { return $this->error('حالة غير صحيحة', 422); }
+        // Realtime push
+        $rt = new Realtime();
+        $rt->publish('appointment-' . (int)$appointmentId, 'video_status', [
+            'appointment_id' => (int)$appointmentId,
+            'status' => $status
+        ]);
         return $this->success('تم التحديث', ['room' => $vc->find((int)$room['id'])]);
     }
 

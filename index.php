@@ -248,6 +248,10 @@ $router->post('/ajax/video/rooms', 'AjaxController@createVideoRoom');
 $router->get('/ajax/video/rooms/{appointment_id}', 'AjaxController@getVideoRoom');
 $router->post('/ajax/video/rooms/{appointment_id}/status', 'AjaxController@updateVideoRoomStatus');
 
+// Video room page (WebRTC UI)
+$router->get('/video/room/{appointment_id}', 'VideoController@room');
+
+
 $router->post('/api/video/rooms/{appointment_id}/status', 'ApiController@updateVideoRoomStatus');
 
 

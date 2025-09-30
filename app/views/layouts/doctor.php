@@ -310,6 +310,17 @@
       window.Doctorna.user = { id: <?= (int)$this->user()['id'] ?>, role: 'doctor' };
     </script>
 
+    <script>
+      window.Doctorna = window.Doctorna || {};
+      window.Doctorna.realtimeConfig = {
+        driver: '<?= addslashes(REALTIME_DRIVER) ?>',
+        appKey: '<?= addslashes(REALTIME_APP_KEY) ?>',
+        cluster: '<?= addslashes(REALTIME_CLUSTER) ?>',
+        wsUrl: '<?= addslashes(REALTIME_WS_URL) ?>'
+      };
+    </script>
+
+
     <script src="<?= $this->asset('js/app.js') ?>"></script>
 
     <script>
