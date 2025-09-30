@@ -58,6 +58,15 @@ define('CACHE_LIFETIME', (int)($_ENV['CACHE_LIFETIME'] ?? 3600));
 define('LOG_LEVEL', $_ENV['LOG_LEVEL'] ?? 'debug');
 define('LOG_FILE', $_ENV['LOG_FILE'] ?? 'logs/app.log');
 
+// Payments: Qi Card (Mastercard) configuration
+define('QI_API_URL', $_ENV['QI_API_URL'] ?? '');
+define('QI_MERCHANT_ID', $_ENV['QI_MERCHANT_ID'] ?? '');
+define('QI_TERMINAL_ID', $_ENV['QI_TERMINAL_ID'] ?? '');
+define('QI_SECRET', $_ENV['QI_SECRET'] ?? '');
+define('QI_MODE', $_ENV['QI_MODE'] ?? 'test');
+define('PAYMENT_RETURN_URL', rtrim($_ENV['PAYMENT_RETURN_URL'] ?? (APP_URL . '/payment/return'), '/'));
+define('PAYMENT_CALLBACK_URL', rtrim($_ENV['PAYMENT_CALLBACK_URL'] ?? (APP_URL . '/api/payments/webhook'), '/'));
+
 // Set timezone
 date_default_timezone_set(APP_TIMEZONE);
 

@@ -11,6 +11,8 @@ require_once APP_PATH . '/models/Patient.php';
 require_once APP_PATH . '/models/Appointment.php';
 require_once APP_PATH . '/models/Specialization.php';
 require_once APP_PATH . '/models/HealthPost.php';
+require_once APP_PATH . '/models/Payment.php';
+require_once APP_PATH . '/services/QiGateway.php';
 
 class ApiController extends Controller {
     private $userModel;
@@ -976,6 +978,168 @@ class ApiController extends Controller {
         $result['data'] = array_values(array_filter($result['data'], function($p){ return ($p['status'] ?? 'pending') === 'approved'; }));
         $this->apiSuccess('Doctor health posts retrieved', $result);
     }
+
+    // ----- Payments (Qi Card) -----
+
+    /**
+     * Initiate payment for an appointment (patient only)
+     * POST /api/payments/initiate
+     */
+    public function initiatePayment() {
+        if (!$this->isPost()) { $this->apiError('Method not allowed', 405); }
+        $user = $this->requireApiAuth();
+        if ($user['role'] !== ROLE_PATIENT) { $this->apiError('Only patients can pay for appointments', 403); }
+
+        $appointmentId = (int)$this->post('appointment_id');
+        if (!$appointmentId) { $this->apiError('Appointment ID is required', 422); }
+
+        $appointment = $this->appointmentModel->find($appointmentId);
+        if (!$appointment) { $this->apiError('Appointment not found', 404); }
+
+        // Ownership check
+        $patient = $this->patientModel->getByUserId($user['id']);
+        if (!$patient || (int)$appointment['patient_id'] !== (int)$patient['id']) {
+            $this->apiError('Forbidden', 403);
+        }
+
+        if (($appointment['status'] ?? '') === APPOINTMENT_CANCELLED) {
+            $this->apiError('Cannot pay for a cancelled appointment', 400);
+        }
+
+        $amount = (float)($appointment['fee'] ?? 0);
+        if ($amount <= 0) { $this->apiError('Invalid appointment fee', 400); }
+
+        $paymentModel = new Payment();
+        $paymentId = $paymentModel->createPayment([
+            'appointment_id' => $appointmentId,
+            'patient_id' => (int)$patient['id'],
+            'doctor_id' => (int)$appointment['doctor_id'],
+            'amount' => $amount,
+            'currency' => 'IQD',
+            'status' => 'initiated',
+            'gateway' => 'qi_card'
+        ]);
+
+        if (!$paymentId) { $this->apiError('Failed to create payment record', 500); }
+
+        $gateway = new QiGateway();
+        if (!$gateway->isConfigured()) { $this->apiError('Payment gateway not configured', 500); }
+
+        $orderId = 'APPT-' . $appointmentId . '-PAY-' . $paymentId;
+        $result = $gateway->createPaymentSession([
+            'order_id' => $orderId,
+            'amount' => $amount,
+            'currency' => 'IQD',
+            'description' => 'Appointment #' . $appointmentId,
+            'return_url' => PAYMENT_RETURN_URL,
+            'callback_url' => PAYMENT_CALLBACK_URL
+        ]);
+
+        if (!($result['ok'] ?? false)) {
+            $this->apiError('Failed to initiate payment with gateway', 502);
+        }
+
+        // Persist gateway ref
+        $paymentModel->update($paymentId, [
+            'gateway_ref' => $result['gateway_ref'] ?? null,
+            'status' => 'pending',
+            'extra' => json_encode($result['raw'] ?? [], JSON_UNESCAPED_UNICODE)
+        ]);
+
+        $this->apiSuccess('Payment initiated', [
+            'payment_id' => (int)$paymentId,
+            'redirect_url' => $result['redirect_url'] ?? null,
+            'gateway_ref' => $result['gateway_ref'] ?? null
+        ], 201);
+    }
+
+    /**
+     * Payment webhook (Qi callback)
+     * POST /api/payments/webhook
+     */
+    public function paymentWebhook() {
+        $raw = file_get_contents('php://input') ?: '';
+        $headers = function_exists('getallheaders') ? getallheaders() : [];
+        $gateway = new QiGateway();
+
+        if (!$gateway->verifySignature($headers, $raw)) {
+            http_response_code(400);
+            echo 'invalid signature';
+            exit;
+        }
+
+        $data = json_decode($raw, true);
+        if (!$data) { $data = $_POST; }
+
+        $gatewayRef = $data['gateway_ref'] ?? $data['reference'] ?? $data['transaction_id'] ?? null;
+        $status = strtolower($data['status'] ?? '');
+        $authCode = $data['auth_code'] ?? null;
+
+        $paymentModel = new Payment();
+        $payment = $gatewayRef ? $paymentModel->findByGatewayRef($gatewayRef) : null;
+        if (!$payment) {
+            http_response_code(404);
+            echo 'payment not found';
+            exit;
+        }
+
+        $appointmentId = (int)$payment['appointment_id'];
+
+        // Update payment and appointment payment_status
+        if (in_array($status, ['paid', 'success', 'succeeded'])) {
+            $paymentModel->markPaid((int)$payment['id'], $gatewayRef, $authCode, json_encode($data, JSON_UNESCAPED_UNICODE));
+            $this->appointmentModel->update($appointmentId, ['payment_status' => 'paid']);
+            // Notify both patient and doctor if needed
+            require_once APP_PATH . '/models/Notification.php';
+            $notif = new Notification();
+            $appt = $this->appointmentModel->getAppointmentDetails($appointmentId);
+            if (!empty($appt['patient_id'])) {
+                $patient = $this->patientModel->find((int)$appt['patient_id']);
+                if ($patient && !empty($patient['user_id'])) {
+                    $notif->createNotification((int)$patient['user_id'], 'payment_success', 'تم دفع الرسوم', 'تم دفع رسوم الموعد #' . $appointmentId, ['appointment_id' => $appointmentId]);
+                }
+            }
+            if (!empty($appt['doctor_id'])) {
+                $doctor = $this->doctorModel->find((int)$appt['doctor_id']);
+                if ($doctor && !empty($doctor['user_id'])) {
+                    $notif->createNotification((int)$doctor['user_id'], 'payment_success', 'تم استلام الدفع', 'تم دفع رسوم الموعد #' . $appointmentId, ['appointment_id' => $appointmentId]);
+                }
+            }
+        } else {
+            $paymentModel->markFailed((int)$payment['id'], $status ?: 'failed', json_encode($data, JSON_UNESCAPED_UNICODE));
+            $this->appointmentModel->update($appointmentId, ['payment_status' => 'pending']);
+        }
+
+        http_response_code(200);
+        echo 'ok';
+        exit;
+    }
+
+    /**
+     * Get payment details (owner patient, doctor of appointment, or admin)
+     * GET /api/payments/{id}
+     */
+    public function getPayment($id) {
+        $user = $this->requireApiAuth();
+        $paymentModel = new Payment();
+        $payment = $paymentModel->find((int)$id);
+        if (!$payment) { $this->apiError('Payment not found', 404); }
+
+        $appointment = $this->appointmentModel->find((int)$payment['appointment_id']);
+        $authorized = false;
+        if ($user['role'] === ROLE_SUPER_ADMIN) { $authorized = true; }
+        elseif ($user['role'] === ROLE_PATIENT) {
+            $patient = $this->patientModel->getByUserId($user['id']);
+            if ($patient && (int)$patient['id'] === (int)$payment['patient_id']) { $authorized = true; }
+        } elseif ($user['role'] === ROLE_DOCTOR) {
+            $doctor = $this->doctorModel->getByUserId($user['id']);
+            if ($doctor && (int)$doctor['id'] === (int)$payment['doctor_id']) { $authorized = true; }
+        }
+        if (!$authorized) { $this->apiError('Forbidden', 403); }
+
+        $this->apiSuccess('Payment retrieved', ['payment' => $payment]);
+    }
+
 
 
 

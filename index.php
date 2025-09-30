@@ -222,6 +222,12 @@ $router->put('/api/health-posts/{id}', 'ApiController@updateHealthPost');
 $router->delete('/api/health-posts/{id}', 'ApiController@deleteHealthPost');
 $router->get('/api/doctors/{id}/health-posts', 'ApiController@doctorHealthPosts');
 
+// Payments API (Qi Card)
+$router->post('/api/payments/initiate', 'ApiController@initiatePayment');
+$router->post('/api/payments/webhook', 'ApiController@paymentWebhook');
+$router->get('/api/payments/{id}', 'ApiController@getPayment');
+
+
 
 // AJAX routes
 $router->post('/ajax/appointment/accept', 'AjaxController@acceptAppointment');

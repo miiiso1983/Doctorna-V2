@@ -26,7 +26,7 @@ CREATE TABLE users (
     last_login TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
+
     INDEX idx_email (email),
     INDEX idx_role (role),
     INDEX idx_status (status),
@@ -45,7 +45,7 @@ CREATE TABLE specializations (
     sort_order INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
+
     INDEX idx_active (is_active),
     INDEX idx_sort (sort_order)
 );
@@ -73,7 +73,7 @@ CREATE TABLE doctors (
     available_days JSON,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
+
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (specialization_id) REFERENCES specializations(id) ON DELETE SET NULL,
     INDEX idx_user (user_id),
@@ -100,7 +100,7 @@ CREATE TABLE patients (
     insurance_number VARCHAR(100),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
+
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     INDEX idx_user (user_id),
     INDEX idx_gender (gender),
@@ -118,7 +118,7 @@ CREATE TABLE symptoms (
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
+
     INDEX idx_category (category),
     INDEX idx_active (is_active)
 );
@@ -129,7 +129,7 @@ CREATE TABLE symptom_specializations (
     symptom_id INT NOT NULL,
     specialization_id INT NOT NULL,
     relevance_score DECIMAL(3, 2) DEFAULT 1.00,
-    
+
     FOREIGN KEY (symptom_id) REFERENCES symptoms(id) ON DELETE CASCADE,
     FOREIGN KEY (specialization_id) REFERENCES specializations(id) ON DELETE CASCADE,
     UNIQUE KEY unique_symptom_spec (symptom_id, specialization_id)
@@ -144,7 +144,7 @@ CREATE TABLE patient_symptoms (
     duration VARCHAR(100),
     notes TEXT,
     reported_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
+
     FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
     FOREIGN KEY (symptom_id) REFERENCES symptoms(id) ON DELETE CASCADE,
     INDEX idx_patient (patient_id),
@@ -174,8 +174,9 @@ CREATE TABLE appointments (
     confirmed_at TIMESTAMP NULL,
     completed_at TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
+
     FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
     FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE CASCADE,
     INDEX idx_patient (patient_id),
@@ -198,12 +199,33 @@ CREATE TABLE doctor_schedules (
     max_appointments INT DEFAULT 20,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
+
     FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE CASCADE,
     INDEX idx_doctor (doctor_id),
     INDEX idx_day (day_of_week),
     UNIQUE KEY unique_doctor_day (doctor_id, day_of_week)
 );
+
+-- Payments table
+CREATE TABLE IF NOT EXISTS payments (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    appointment_id INT NOT NULL,
+    patient_id INT NOT NULL,
+    doctor_id INT NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    currency VARCHAR(10) DEFAULT 'IQD',
+    status ENUM('initiated','pending','paid','failed','refunded','canceled') DEFAULT 'initiated',
+    gateway VARCHAR(50) DEFAULT 'qi_card',
+    gateway_ref VARCHAR(191) NULL,
+    auth_code VARCHAR(64) NULL,
+    extra TEXT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL,
+    INDEX idx_pay_appt (appointment_id),
+    INDEX idx_pay_patient (patient_id),
+    INDEX idx_pay_doctor (doctor_id)
+);
+
 
 -- Doctor reviews and ratings
 CREATE TABLE reviews (
@@ -217,7 +239,7 @@ CREATE TABLE reviews (
     is_approved BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
+
     FOREIGN KEY (appointment_id) REFERENCES appointments(id) ON DELETE CASCADE,
     FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
     FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE CASCADE,
@@ -237,7 +259,7 @@ CREATE TABLE notifications (
     data JSON,
     is_read BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
+
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     INDEX idx_user (user_id),
     INDEX idx_read (is_read),
@@ -251,7 +273,7 @@ CREATE TABLE password_resets (
     token VARCHAR(255) NOT NULL,
     expires_at TIMESTAMP NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
+
     INDEX idx_token (token),
     INDEX idx_expires (expires_at)
 );
@@ -266,7 +288,7 @@ CREATE TABLE settings (
     is_public BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
+
     INDEX idx_key (key_name),
     INDEX idx_public (is_public)
 );
@@ -281,7 +303,7 @@ CREATE TABLE activity_logs (
     user_agent TEXT,
     data JSON,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
+
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
     INDEX idx_user (user_id),
     INDEX idx_action (action),
