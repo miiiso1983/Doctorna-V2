@@ -226,6 +226,21 @@ CREATE TABLE IF NOT EXISTS payments (
     INDEX idx_pay_doctor (doctor_id)
 );
 
+-- Chat messages per appointment
+CREATE TABLE IF NOT EXISTS chat_messages (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    appointment_id INT NOT NULL,
+    sender_user_id INT NOT NULL,
+    recipient_user_id INT NOT NULL,
+    message TEXT NOT NULL,
+    is_read TINYINT(1) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_chat_appt (appointment_id),
+    INDEX idx_chat_recipient (recipient_user_id),
+    INDEX idx_chat_sender (sender_user_id)
+);
+
+
 
 -- Doctor reviews and ratings
 CREATE TABLE reviews (

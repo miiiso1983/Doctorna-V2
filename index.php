@@ -228,6 +228,13 @@ $router->post('/api/payments/webhook', 'ApiController@paymentWebhook');
 $router->get('/api/payments/{id}', 'ApiController@getPayment');
 
 
+// Chat API
+$router->get('/api/chats/threads', 'ApiController@chatThreads');
+$router->get('/api/chats/{appointment_id}', 'ApiController@chatMessages');
+$router->post('/api/chats/send', 'ApiController@sendChatMessage');
+$router->post('/api/chats/{appointment_id}/read', 'ApiController@readChat');
+
+
 
 // AJAX routes
 $router->post('/ajax/appointment/accept', 'AjaxController@acceptAppointment');

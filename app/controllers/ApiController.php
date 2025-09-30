@@ -12,6 +12,7 @@ require_once APP_PATH . '/models/Appointment.php';
 require_once APP_PATH . '/models/Specialization.php';
 require_once APP_PATH . '/models/HealthPost.php';
 require_once APP_PATH . '/models/Payment.php';
+require_once APP_PATH . '/models/ChatMessage.php';
 require_once APP_PATH . '/services/QiGateway.php';
 
 class ApiController extends Controller {
@@ -1142,5 +1143,137 @@ class ApiController extends Controller {
 
 
 
+
+
+    // ----- Chat/Messaging -----
+
+    /**
+     * List chat threads (appointments that have messages) for the current user
+     * GET /api/chats/threads
+     */
+    public function chatThreads() {
+        $user = $this->requireApiAuth();
+        $page = (int)$this->get('page', 1);
+        $perPage = (int)$this->get('per_page', 20);
+
+        $chat = new ChatMessage();
+        $threads = $chat->getThreadsForUser((int)$user['id'], $page, $perPage);
+
+        // Enrich with appointment counterpart data
+        foreach ($threads['data'] as &$t) {
+            $appt = $this->appointmentModel->getAppointmentDetails((int)$t['appointment_id']);
+            if ($user['role'] === ROLE_PATIENT) {
+                $t['counterparty'] = [
+                    'type' => 'doctor',
+                    'id' => (int)($appt['doctor_id'] ?? 0),
+                    'name' => $appt['doctor_name'] ?? ''
+                ];
+            } else {
+                $t['counterparty'] = [
+                    'type' => 'patient',
+                    'id' => (int)($appt['patient_id'] ?? 0),
+                    'name' => $appt['patient_name'] ?? ''
+                ];
+            }
+        }
+
+        $this->apiSuccess('Chat threads retrieved', $threads);
+    }
+
+    /**
+     * Get messages for an appointment (authorized to its patient/doctor)
+     * GET /api/chats/{appointment_id}
+     */
+    public function chatMessages($appointmentId) {
+        $user = $this->requireApiAuth();
+        $appt = $this->appointmentModel->find((int)$appointmentId);
+        if (!$appt) { $this->apiError('Appointment not found', 404); }
+
+        // Authorization: patient or doctor of the appointment
+        $authorized = false;
+        if ($user['role'] === ROLE_PATIENT) {
+            $patient = $this->patientModel->getByUserId($user['id']);
+            if ($patient && (int)$patient['id'] === (int)$appt['patient_id']) { $authorized = true; }
+        } elseif ($user['role'] === ROLE_DOCTOR) {
+            $doctor = $this->doctorModel->getByUserId($user['id']);
+            if ($doctor && (int)$doctor['id'] === (int)$appt['doctor_id']) { $authorized = true; }
+        } elseif ($user['role'] === ROLE_SUPER_ADMIN) { $authorized = true; }
+        if (!$authorized) { $this->apiError('Forbidden', 403); }
+
+        $page = (int)$this->get('page', 1);
+        $perPage = (int)$this->get('per_page', 50);
+        $chat = new ChatMessage();
+        $messages = $chat->getMessages((int)$appointmentId, $page, $perPage);
+
+        // Mark current user's received messages as read
+        $chat->markAsReadForRecipient((int)$appointmentId, (int)$user['id']);
+
+        $this->apiSuccess('Messages retrieved', $messages);
+    }
+
+    /**
+     * Send a message in an appointment chat
+     * POST /api/chats/send
+     */
+    public function sendChatMessage() {
+        if (!$this->isPost()) { $this->apiError('Method not allowed', 405); }
+        $user = $this->requireApiAuth();
+
+        $appointmentId = (int)$this->post('appointment_id');
+        $message = trim((string)$this->post('message'));
+        if (!$appointmentId || $message === '') { $this->apiError('Appointment and message are required', 422); }
+
+        $appt = $this->appointmentModel->getAppointmentDetails($appointmentId);
+        if (!$appt) { $this->apiError('Appointment not found', 404); }
+
+        // Determine recipient based on role and authorization
+        if ($user['role'] === ROLE_PATIENT) {
+            $patient = $this->patientModel->getByUserId($user['id']);
+            if (!$patient || (int)$patient['id'] !== (int)$appt['patient_id']) { $this->apiError('Forbidden', 403); }
+            $recipientUserId = (int)($appt['doctor_user_id'] ?? ($this->doctorModel->find((int)$appt['doctor_id'])['user_id'] ?? 0));
+        } elseif ($user['role'] === ROLE_DOCTOR) {
+            $doctor = $this->doctorModel->getByUserId($user['id']);
+            if (!$doctor || (int)$doctor['id'] !== (int)$appt['doctor_id']) { $this->apiError('Forbidden', 403); }
+            $recipientUserId = (int)($appt['patient_user_id'] ?? ($this->patientModel->find((int)$appt['patient_id'])['user_id'] ?? 0));
+        } else {
+            $this->apiError('Only doctors and patients can send messages', 403);
+        }
+
+        if (!$recipientUserId) { $this->apiError('Recipient not found', 404); }
+
+        $chat = new ChatMessage();
+        $msgId = $chat->createMessage([
+            'appointment_id' => $appointmentId,
+            'sender_user_id' => (int)$user['id'],
+            'recipient_user_id' => $recipientUserId,
+            'message' => $message
+        ]);
+
+        if (!$msgId) { $this->apiError('Failed to send message', 500); }
+
+        // Notify recipient
+        require_once APP_PATH . '/models/Notification.php';
+        $notif = new Notification();
+        $notif->createNotification(
+            $recipientUserId,
+            'chat_message',
+            'رسالة جديدة',
+            'لديك رسالة جديدة بخصوص الموعد #' . $appointmentId,
+            ['appointment_id' => $appointmentId]
+        );
+
+        $this->apiSuccess('Message sent', ['message_id' => (int)$msgId], 201);
+    }
+
+    /**
+     * Mark messages as read for the current user in an appointment chat
+     * POST /api/chats/{appointment_id}/read
+     */
+    public function readChat($appointmentId) {
+        $user = $this->requireApiAuth();
+        $chat = new ChatMessage();
+        $chat->markAsReadForRecipient((int)$appointmentId, (int)$user['id']);
+        $this->apiSuccess('Marked as read');
+    }
 
 }
