@@ -34,9 +34,11 @@
                   <?= $this->escape($a['specialization_name'] ?? '') ?>
                 </div>
               </div>
-              <span class="badge bg-<?= $this->statusBadgeClass($a['status']) ?>">
-                <?= $this->statusLabel($a['status']) ?>
-              </span>
+              <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-sm btn-outline-secondary" title="دردشة" onclick="Doctorna.chat.open(<?= (int)$a['id'] ?>)"><i class="fas fa-comments"></i></button>
+                <button class="btn btn-sm btn-outline-primary" title="مكالمة فيديو" onclick="Doctorna.video.open(<?= (int)$a['id'] ?>)"><i class="fas fa-video"></i></button>
+                <span class="badge bg-<?= $this->statusBadgeClass($a['status']) ?>"><?= $this->statusLabel($a['status']) ?></span>
+              </div>
             </div>
             <div class="mt-2 text-muted">
               <i class="far fa-calendar-alt me-1"></i><?= $this->formatArabicDate($a['appointment_date']) ?>
@@ -82,4 +84,46 @@
     <h6 class="text-muted">لا توجد مواعيد</h6>
   </div>
 <?php endif; ?>
+
+<!-- Chat Modal -->
+<div class="modal fade" id="chatModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fas fa-comments me-2"></i>الدردشة</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="chatMessages" style="max-height:50vh; overflow:auto;"></div>
+      </div>
+      <div class="modal-footer">
+        <form id="chatForm" class="w-100 d-flex gap-2" onsubmit="return Doctorna.chat.send(event)">
+          <input type="hidden" id="chatAppointmentId">
+          <input type="text" id="chatInput" class="form-control" placeholder="اكتب رسالتك..." required>
+          <button class="btn btn-primary" type="submit"><i class="fas fa-paper-plane"></i></button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Video Modal -->
+<div class="modal fade" id="videoModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fas fa-video me-2"></i>مكالمة فيديو</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="videoInfo" class="small text-muted">سيتم إنشاء غرفة المكالمة...</div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-success" id="btnStartCall" onclick="Doctorna.video.start()"><i class="fas fa-play"></i> بدء</button>
+        <button class="btn btn-danger" id="btnEndCall" onclick="Doctorna.video.end()"><i class="fas fa-stop"></i> إنهاء</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 

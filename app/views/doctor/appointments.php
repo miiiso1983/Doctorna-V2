@@ -82,6 +82,12 @@
                                                         <i class="fas fa-clipboard-check"></i>
                                                     </button>
                                                 <?php endif; ?>
+                                                <button class="btn btn-outline-secondary" title="دردشة" onclick="Doctorna.chat.open(<?= (int)$appointment['id'] ?>)">
+                                                    <i class="fas fa-comments"></i>
+                                                </button>
+                                                <button class="btn btn-outline-primary" title="مكالمة فيديو" onclick="Doctorna.video.open(<?= (int)$appointment['id'] ?>)">
+                                                    <i class="fas fa-video"></i>
+                                                </button>
                                                 <a class="btn btn-outline-info" href="<?= $this->url('/doctor/appointments/' . (int)$appointment['id']) ?>">
                                                     تفاصيل
                                                 </a>
@@ -152,6 +158,7 @@ function completeAppointment(appointmentId) {
     formData.append('appointment_id', appointmentId);
     formData.append('notes', notes);
     formData.append('prescription', prescription);
+
     formData.append('csrf_token', document.querySelector('meta[name="csrf-token"]').content);
     fetch('<?= $this->url('/doctor/complete-appointment') ?>', { method: 'POST', body: formData })
         .then(r => r.json()).then(d => { if (d.success) location.reload(); else alert(d.message||'خطأ'); })
@@ -159,3 +166,45 @@ function completeAppointment(appointmentId) {
 }
 </script>
 
+
+
+<!-- Chat Modal -->
+<div class="modal fade" id="chatModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fas fa-comments me-2"></i>الدردشة</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="chatMessages" style="max-height:50vh; overflow:auto;"></div>
+      </div>
+      <div class="modal-footer">
+        <form id="chatForm" class="w-100 d-flex gap-2" onsubmit="return Doctorna.chat.send(event)">
+          <input type="hidden" id="chatAppointmentId">
+          <input type="text" id="chatInput" class="form-control" placeholder="اكتب رسالتك..." required>
+          <button class="btn btn-primary" type="submit"><i class="fas fa-paper-plane"></i></button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Video Modal -->
+<div class="modal fade" id="videoModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fas fa-video me-2"></i>مكالمة فيديو</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="videoInfo" class="small text-muted">سيتم إنشاء غرفة المكالمة...</div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-success" id="btnStartCall" onclick="Doctorna.video.start()"><i class="fas fa-play"></i> بدء</button>
+        <button class="btn btn-danger" id="btnEndCall" onclick="Doctorna.video.end()"><i class="fas fa-stop"></i> إنهاء</button>
+      </div>
+    </div>
+  </div>
+</div>

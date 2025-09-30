@@ -9,7 +9,7 @@ window.Doctorna = {
         csrfToken: document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'),
         locale: 'ar'
     },
-    
+
     // Utility functions
     utils: {
         // Show loading spinner
@@ -21,7 +21,7 @@ window.Doctorna = {
                 element.innerHTML = '<div class="spinner mx-auto"></div>';
             }
         },
-        
+
         // Hide loading spinner
         hideLoading: function(element) {
             if (typeof element === 'string') {
@@ -31,19 +31,19 @@ window.Doctorna = {
                 element.innerHTML = '';
             }
         },
-        
+
         // Show toast notification
         showToast: function(message, type = 'success') {
             const toastContainer = document.getElementById('toast-container') || this.createToastContainer();
             const toast = this.createToast(message, type);
             toastContainer.appendChild(toast);
-            
+
             // Auto remove after 5 seconds
             setTimeout(() => {
                 toast.remove();
             }, 5000);
         },
-        
+
         // Create toast container
         createToastContainer: function() {
             const container = document.createElement('div');
@@ -53,7 +53,7 @@ window.Doctorna = {
             document.body.appendChild(container);
             return container;
         },
-        
+
         // Create toast element
         createToast: function(message, type) {
             const toast = document.createElement('div');
@@ -65,14 +65,14 @@ window.Doctorna = {
                     <button type="button" class="btn-close btn-close-white me-2 m-auto" onclick="this.parentElement.parentElement.remove()"></button>
                 </div>
             `;
-            
+
             // Show toast
             const bsToast = new bootstrap.Toast(toast);
             bsToast.show();
-            
+
             return toast;
         },
-        
+
         // Format currency (Iraqi Dinar)
         formatCurrency: function(amount) {
             try {
@@ -87,7 +87,7 @@ window.Doctorna = {
                 return (Number(amount) || 0).toLocaleString('ar-IQ') + ' د.ع';
             }
         },
-        
+
         // Format date
         formatDate: function(date, options = {}) {
             const defaultOptions = {
@@ -97,42 +97,42 @@ window.Doctorna = {
             };
             return new Intl.DateTimeFormat('ar-IQ', { ...defaultOptions, ...options }).format(new Date(date));
         },
-        
+
         // Validate email
         validateEmail: function(email) {
             const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             return re.test(email);
         },
-        
+
         // Validate phone
         validatePhone: function(phone) {
             const re = /^[0-9+\-\s()]+$/;
             return re.test(phone);
         }
     },
-    
+
     // AJAX helper
     ajax: {
         // GET request
         get: function(url, options = {}) {
             return this.request('GET', url, null, options);
         },
-        
+
         // POST request
         post: function(url, data = {}, options = {}) {
             return this.request('POST', url, data, options);
         },
-        
+
         // PUT request
         put: function(url, data = {}, options = {}) {
             return this.request('PUT', url, data, options);
         },
-        
+
         // DELETE request
         delete: function(url, options = {}) {
             return this.request('DELETE', url, null, options);
         },
-        
+
         // Generic request
         request: function(method, url, data = null, options = {}) {
             const defaultOptions = {
@@ -141,18 +141,18 @@ window.Doctorna = {
                     'X-Requested-With': 'XMLHttpRequest'
                 }
             };
-            
+
             // Add CSRF token for state-changing requests
             if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(method)) {
                 defaultOptions.headers['X-CSRF-TOKEN'] = Doctorna.config.csrfToken;
             }
-            
+
             const config = {
                 method: method,
                 ...defaultOptions,
                 ...options
             };
-            
+
             if (data) {
                 if (data instanceof FormData) {
                     delete config.headers['Content-Type']; // Let browser set it
@@ -161,7 +161,7 @@ window.Doctorna = {
                     config.body = JSON.stringify(data);
                 }
             }
-            
+
             return fetch(url, config)
                 .then(response => {
                     if (!response.ok) {
@@ -175,7 +175,7 @@ window.Doctorna = {
                 });
         }
     },
-    
+
     // Form helpers
     forms: {
         // Serialize form data
@@ -190,19 +190,19 @@ window.Doctorna = {
             for (let [key, value] of formData.entries()) {
                 data[key] = value;
             }
-            
+
             return data;
         },
-        
+
         // Validate form
         validate: function(form) {
             if (typeof form === 'string') {
                 form = document.querySelector(form);
             }
-            
+
             const inputs = form.querySelectorAll('input, select, textarea');
             let isValid = true;
-            
+
             inputs.forEach(input => {
                 if (input.hasAttribute('required') && !input.value.trim()) {
                     this.showFieldError(input, 'هذا الحقل مطلوب');
@@ -214,14 +214,14 @@ window.Doctorna = {
                     this.clearFieldError(input);
                 }
             });
-            
+
             return isValid;
         },
-        
+
         // Show field error
         showFieldError: function(field, message) {
             field.classList.add('is-invalid');
-            
+
             let feedback = field.parentNode.querySelector('.invalid-feedback');
             if (!feedback) {
                 feedback = document.createElement('div');
@@ -230,7 +230,7 @@ window.Doctorna = {
             }
             feedback.textContent = message;
         },
-        
+
         // Clear field error
         clearFieldError: function(field) {
             field.classList.remove('is-invalid');
@@ -249,13 +249,13 @@ document.addEventListener('DOMContentLoaded', function() {
     tooltipTriggerList.map(function(tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl);
     });
-    
+
     // Initialize popovers
     const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
     popoverTriggerList.map(function(popoverTriggerEl) {
         return new bootstrap.Popover(popoverTriggerEl);
     });
-    
+
     // Auto-hide alerts
     const alerts = document.querySelectorAll('.alert:not(.alert-permanent)');
     alerts.forEach(alert => {
@@ -264,7 +264,7 @@ document.addEventListener('DOMContentLoaded', function() {
             bsAlert.close();
         }, 5000);
     });
-    
+
     // Form validation
     const forms = document.querySelectorAll('.needs-validation');
     forms.forEach(form => {
@@ -276,7 +276,7 @@ document.addEventListener('DOMContentLoaded', function() {
             form.classList.add('was-validated');
         });
     });
-    
+
     // Confirm dialogs
     const confirmButtons = document.querySelectorAll('[data-confirm]');
     confirmButtons.forEach(button => {
@@ -287,7 +287,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-    
+
     // Auto-resize textareas
     const textareas = document.querySelectorAll('textarea[data-auto-resize]');
     textareas.forEach(textarea => {
@@ -296,7 +296,7 @@ document.addEventListener('DOMContentLoaded', function() {
             this.style.height = this.scrollHeight + 'px';
         });
     });
-    
+
     // Search functionality
     const searchInputs = document.querySelectorAll('[data-search]');
     searchInputs.forEach(input => {
@@ -307,7 +307,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const target = this.getAttribute('data-search');
                 const query = this.value.toLowerCase();
                 const items = document.querySelectorAll(target);
-                
+
                 items.forEach(item => {
                     const text = item.textContent.toLowerCase();
                     if (text.includes(query)) {
@@ -319,7 +319,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 300);
         });
     });
-    
+
     // Smooth scrolling for anchor links
     const anchorLinks = document.querySelectorAll('a[href^="#"]');
     anchorLinks.forEach(link => {
@@ -334,7 +334,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-    
+
     // Back to top button
     const backToTopButton = document.createElement('button');
     backToTopButton.innerHTML = '<i class="fas fa-arrow-up"></i>';
@@ -345,7 +345,7 @@ document.addEventListener('DOMContentLoaded', function() {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     });
     document.body.appendChild(backToTopButton);
-    
+
     // Show/hide back to top button
     window.addEventListener('scroll', () => {
         if (window.pageYOffset > 300) {
@@ -374,3 +374,118 @@ if ('serviceWorker' in navigator) {
             });
     });
 }
+
+
+// Chat module (session-auth via /ajax)
+Doctorna.chat = (function(){
+  let currentAppointmentId = null;
+  let pollTimer = null;
+  let attachedHideHandler = false;
+  function render(messages){
+    const box = document.getElementById('chatMessages');
+    if (!box) return;
+    const myId = (Doctorna.user && Doctorna.user.id) ? Number(Doctorna.user.id) : 0;
+    const items = (messages && Array.isArray(messages.data)) ? messages.data : (Array.isArray(messages) ? messages : (messages && messages.items) || []);
+    box.innerHTML = items.map(m => {
+      const mine = Number(m.sender_user_id) === myId;
+      const align = mine ? 'text-end' : 'text-start';
+      const bg = mine ? 'bg-primary text-white' : 'bg-light';
+      const time = m.created_at ? new Date(m.created_at).toLocaleString('ar-IQ') : '';
+      return `<div class="${align} mb-2">
+        <div class="d-inline-block px-3 py-2 rounded-3 ${bg}" style="max-width:80%">
+          <div class="small">${(m.message || '').replace(/</g,'&lt;')}</div>
+          <div class="text-muted small mt-1">${time}</div>
+        </div>
+      </div>`;
+    }).join('');
+    // scroll to bottom
+    box.scrollTop = box.scrollHeight;
+  }
+  function load(appointmentId){
+    return Doctorna.ajax.get(`/ajax/chats/${appointmentId}`)
+      .then(d => { render(d.data || d); })
+      .catch(() => {});
+  }
+  function startPolling(){
+    stopPolling();
+    pollTimer = setInterval(() => { if (currentAppointmentId) load(currentAppointmentId); }, 5000);
+  }
+  function stopPolling(){ if (pollTimer) { clearInterval(pollTimer); pollTimer = null; } }
+  return {
+    open: function(appointmentId){
+      currentAppointmentId = appointmentId;
+      const hidden = document.getElementById('chatAppointmentId');
+      if (hidden) hidden.value = appointmentId;
+      load(appointmentId).then(() => {
+        // mark as read
+        Doctorna.ajax.post(`/ajax/chats/${appointmentId}/read`, {});
+      });
+      const modalEl = document.getElementById('chatModal');
+      if (!attachedHideHandler && modalEl) {
+        modalEl.addEventListener('hidden.bs.modal', function(){ stopPolling(); currentAppointmentId = null; });
+        attachedHideHandler = true;
+      }
+      new bootstrap.Modal(modalEl).show();
+      startPolling();
+    },
+    send: function(e){
+      if (e) { e.preventDefault(); }
+      const input = document.getElementById('chatInput');
+      const appointmentId = document.getElementById('chatAppointmentId')?.value;
+      const msg = (input?.value || '').trim();
+      if (!appointmentId || !msg) return false;
+      Doctorna.ajax.post('/ajax/chats/send', { appointment_id: Number(appointmentId), message: msg })
+        .then(d => {
+          input.value = '';
+          return load(appointmentId);
+        })
+        .catch(() => Doctorna.utils.showToast('تعذر إرسال الرسالة', 'danger'));
+      return false;
+    }
+  };
+})();
+
+// Video module (session-auth via /ajax)
+Doctorna.video = (function(){
+  let currentAppointmentId = null;
+  let currentRoom = null;
+  function setInfo(text){ const el = document.getElementById('videoInfo'); if (el) el.innerHTML = text; }
+  function renderRoom(room){
+    if (!room) { setInfo('لم يتم العثور على غرفة.'); return; }
+    currentRoom = room;
+    const status = room.status || 'scheduled';
+    const code = room.room_code || '';
+    setInfo(`<div>رمز الغرفة: <span class="fw-bold">${code}</span></div>
+             <div class="mt-1">الحالة: <span class="badge bg-secondary">${status}</span></div>
+             <div class="mt-2 small text-muted">استخدم رمز الغرفة للانضمام عبر التطبيق/المتصفح.</div>`);
+  }
+  function ensureRoom(appointmentId){
+    // Try to get, if not exists create
+    return Doctorna.ajax.get(`/ajax/video/rooms/${appointmentId}`)
+      .then(d => { renderRoom((d.data && d.data.room) || d.room || d.data); })
+      .catch(() => Doctorna.ajax.post('/ajax/video/rooms', { appointment_id: Number(appointmentId) })
+         .then(d => { renderRoom((d.data && d.data.room) || d.room || d.data); })
+      );
+  }
+  return {
+    open: function(appointmentId){
+      currentAppointmentId = appointmentId;
+      const modalEl = document.getElementById('videoModal');
+      if (modalEl) new bootstrap.Modal(modalEl).show();
+      setInfo('جاري تجهيز الغرفة...');
+      ensureRoom(appointmentId).catch(() => setInfo('تعذر إنشاء الغرفة'));
+    },
+    start: function(){
+      if (!currentAppointmentId) return;
+      Doctorna.ajax.post(`/ajax/video/rooms/${currentAppointmentId}/status`, { status: 'ongoing' })
+        .then(d => { renderRoom((d.data && d.data.room) || d.room || d.data); })
+        .catch(() => Doctorna.utils.showToast('تعذر بدء المكالمة', 'danger'));
+    },
+    end: function(){
+      if (!currentAppointmentId) return;
+      Doctorna.ajax.post(`/ajax/video/rooms/${currentAppointmentId}/status`, { status: 'ended' })
+        .then(d => { renderRoom((d.data && d.data.room) || d.room || d.data); })
+        .catch(() => Doctorna.utils.showToast('تعذر إنهاء المكالمة', 'danger'));
+    }
+  };
+})();

@@ -237,6 +237,17 @@ $router->post('/api/chats/{appointment_id}/read', 'ApiController@readChat');
 // Video Call API
 $router->post('/api/video/rooms', 'ApiController@createVideoRoom');
 $router->get('/api/video/rooms/{appointment_id}', 'ApiController@getVideoRoom');
+
+// Chat AJAX
+$router->get('/ajax/chats/{appointment_id}', 'AjaxController@chatMessages');
+$router->post('/ajax/chats/send', 'AjaxController@sendChatMessage');
+$router->post('/ajax/chats/{appointment_id}/read', 'AjaxController@readChat');
+
+// Video AJAX
+$router->post('/ajax/video/rooms', 'AjaxController@createVideoRoom');
+$router->get('/ajax/video/rooms/{appointment_id}', 'AjaxController@getVideoRoom');
+$router->post('/ajax/video/rooms/{appointment_id}/status', 'AjaxController@updateVideoRoomStatus');
+
 $router->post('/api/video/rooms/{appointment_id}/status', 'ApiController@updateVideoRoomStatus');
 
 

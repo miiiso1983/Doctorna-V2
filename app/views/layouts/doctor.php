@@ -4,33 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="لوحة الطبيب - نظام طبيبك">
-    
+
     <!-- CSRF Token -->
     <?= CSRF::meta() ?>
-    
+
     <title><?= $title ?? 'لوحة الطبيب' ?> - <?= APP_NAME ?></title>
-    
+
     <!-- Bootstrap 5 RTL CSS -->
     <link href="<?= $this->asset('vendor/bootstrap/bootstrap.rtl.min.css') ?>" rel="stylesheet">
-    
+
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    
+
     <!-- Google Fonts - Arabic -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
-    
+
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+
     <!-- Custom CSS -->
     <link href="<?= $this->asset('css/style.css') ?>" rel="stylesheet">
-    
+
     <style>
         body {
             font-family: 'Cairo', sans-serif;
             background-color: #f8f9fa;
         }
-        
+
         .sidebar {
             background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
             min-height: 100vh;
@@ -41,67 +41,67 @@
             z-index: 1000;
             transition: all 0.3s ease;
         }
-        
+
         .sidebar.collapsed {
             width: 70px;
         }
-        
+
         .sidebar .nav-link {
             color: rgba(255, 255, 255, 0.8);
             padding: 1rem 1.5rem;
             border-radius: 0;
             transition: all 0.3s ease;
         }
-        
+
         .sidebar .nav-link:hover,
         .sidebar .nav-link.active {
             color: white;
             background-color: rgba(255, 255, 255, 0.1);
         }
-        
+
         .main-content {
             margin-right: 250px;
             transition: all 0.3s ease;
         }
-        
+
         .main-content.expanded {
             margin-right: 70px;
         }
-        
+
         .navbar {
             background: white;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-        
+
         .doctor-avatar {
             width: 40px;
             height: 40px;
             border-radius: 50%;
             object-fit: cover;
         }
-        
+
         .stat-card {
             background: linear-gradient(135deg, var(--bg-color, #28a745) 0%, var(--bg-color-end, #20c997) 100%);
             color: white;
         }
-        
+
         .appointment-card {
             border-left: 4px solid var(--status-color, #28a745);
             transition: all 0.3s ease;
         }
-        
+
         .appointment-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
         }
-        
+
         @media (max-width: 768px) {
             .sidebar {
                 width: 100%;
                 height: auto;
                 position: relative;
             }
-            
+
             .main-content {
                 margin-right: 0;
             }
@@ -120,7 +120,7 @@
                 </div>
             </div>
         </div>
-        
+
         <ul class="nav flex-column">
             <li class="nav-item">
                 <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], '/doctor') === 0 && strlen($_SERVER['REQUEST_URI']) <= 7 ? 'active' : '' ?>"
@@ -199,7 +199,7 @@
             </li>
         </ul>
     </nav>
-    
+
     <!-- Main Content -->
     <div class="main-content" id="main-content">
         <!-- Top Navbar -->
@@ -208,13 +208,13 @@
                 <button class="btn btn-outline-secondary me-3" id="sidebar-toggle">
                     <i class="fas fa-bars"></i>
                 </button>
-                
+
                 <h4 class="mb-0"><?= $title ?? 'لوحة الطبيب' ?></h4>
-                
+
                 <div class="navbar-nav ms-auto">
                     <!-- Notifications -->
                     <div class="nav-item dropdown me-3">
-                        <a class="nav-link position-relative" href="#" id="notificationsDropdown" 
+                        <a class="nav-link position-relative" href="#" id="notificationsDropdown"
                            role="button" data-bs-toggle="dropdown">
                             <i class="fas fa-bell fa-lg"></i>
                             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
@@ -236,13 +236,13 @@
                             <li><a class="dropdown-item text-center" href="#">عرض جميع الإشعارات</a></li>
                         </ul>
                     </div>
-                    
+
                     <!-- User Profile -->
                     <div class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" 
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown"
                            role="button" data-bs-toggle="dropdown">
                             <?php if (!empty($this->user()['avatar'])): ?>
-                                <img src="<?= $this->asset('uploads/profiles/' . $this->user()['avatar']) ?>" 
+                                <img src="<?= $this->asset('uploads/profiles/' . $this->user()['avatar']) ?>"
                                      alt="الصورة الشخصية" class="doctor-avatar me-2">
                             <?php else: ?>
                                 <i class="fas fa-user-circle fa-lg me-2"></i>
@@ -265,7 +265,7 @@
                 </div>
             </div>
         </nav>
-        
+
         <!-- Flash Messages -->
         <?php if ($this->hasFlash('success')): ?>
             <div class="alert alert-success alert-dismissible fade show m-3" role="alert">
@@ -274,7 +274,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         <?php endif; ?>
-        
+
         <?php if ($this->hasFlash('error')): ?>
             <div class="alert alert-danger alert-dismissible fade show m-3" role="alert">
                 <i class="fas fa-exclamation-circle me-2"></i>
@@ -282,7 +282,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         <?php endif; ?>
-        
+
         <?php if ($this->hasFlash('warning')): ?>
             <div class="alert alert-warning alert-dismissible fade show m-3" role="alert">
                 <i class="fas fa-exclamation-triangle me-2"></i>
@@ -290,43 +290,49 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         <?php endif; ?>
-        
+
         <!-- Page Content -->
         <div class="container-fluid p-4">
             <?= $content ?>
         </div>
     </div>
-    
+
     <!-- Bootstrap 5 JS -->
     <script src="<?= $this->asset('vendor/bootstrap/bootstrap.bundle.min.js') ?>"></script>
-    
+
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-    
+
     <!-- Custom JS -->
+
+    <script>
+      window.Doctorna = window.Doctorna || {};
+      window.Doctorna.user = { id: <?= (int)$this->user()['id'] ?>, role: 'doctor' };
+    </script>
+
     <script src="<?= $this->asset('js/app.js') ?>"></script>
-    
+
     <script>
         // Sidebar toggle
         document.getElementById('sidebar-toggle').addEventListener('click', function() {
             const sidebar = document.getElementById('sidebar');
             const mainContent = document.getElementById('main-content');
-            
+
             sidebar.classList.toggle('collapsed');
             mainContent.classList.toggle('expanded');
         });
-        
+
         // Auto-hide alerts
         setTimeout(function() {
             $('.alert').fadeOut('slow');
         }, 5000);
-        
+
         // Initialize tooltips
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
         var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl);
         });
-        
+
         // Confirm dialogs
         document.querySelectorAll('[data-confirm]').forEach(function(element) {
             element.addEventListener('click', function(e) {
@@ -335,14 +341,14 @@
                 }
             });
         });
-        
+
         // AJAX appointment actions
         function updateAppointmentStatus(appointmentId, action, reason = '') {
             const formData = new FormData();
             formData.append('appointment_id', appointmentId);
             formData.append('reason', reason);
             formData.append('csrf_token', document.querySelector('meta[name="csrf-token"]').content);
-            
+
             fetch(`/doctor/${action}-appointment`, {
                 method: 'POST',
                 body: formData
@@ -362,14 +368,14 @@
             });
         }
     </script>
-    
+
     <!-- Additional JS -->
     <?php if (isset($additional_js)): ?>
         <?php foreach ($additional_js as $js): ?>
             <script src="<?= $this->asset($js) ?>"></script>
         <?php endforeach; ?>
     <?php endif; ?>
-    
+
     <!-- Inline Scripts -->
     <?php if (isset($inline_scripts)): ?>
         <script>

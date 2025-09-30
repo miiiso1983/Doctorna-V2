@@ -267,6 +267,196 @@ class AjaxController extends Controller {
             'slots' => array_values($slots)
         ]);
     }
+
+    // ----- Chat (AJAX, session auth) -----
+
+    /**
+     * GET /ajax/chats/{appointment_id}
+     */
+    public function chatMessages($appointmentId) {
+        $this->requireAuth();
+        require_once APP_PATH . '/models/Appointment.php';
+        require_once APP_PATH . '/models/ChatMessage.php';
+        require_once APP_PATH . '/models/Doctor.php';
+        require_once APP_PATH . '/models/Patient.php';
+
+        $appointmentModel = new Appointment();
+        $chat = new ChatMessage();
+        $doctorModel = new Doctor();
+        $patientModel = new Patient();
+
+        $appt = $appointmentModel->find((int)$appointmentId);
+        if (!$appt) { return $this->error('الموعد غير موجود', 404); }
+
+        $user = $this->auth->user();
+        $authorized = false;
+        if ($user['role'] === ROLE_SUPER_ADMIN) { $authorized = true; }
+        elseif ($user['role'] === ROLE_PATIENT) {
+            $patient = $patientModel->getByUserId($user['id']);
+            if ($patient && (int)$patient['id'] === (int)$appt['patient_id']) { $authorized = true; }
+        } elseif ($user['role'] === ROLE_DOCTOR) {
+            $doctor = $doctorModel->getByUserId($user['id']);
+            if ($doctor && (int)$doctor['id'] === (int)$appt['doctor_id']) { $authorized = true; }
+        }
+        if (!$authorized) { return $this->error('غير مصرح', 403); }
+
+        $page = (int)($this->get('page', 1));
+        $perPage = (int)($this->get('per_page', 50));
+        $messages = $chat->getMessages((int)$appointmentId, $page, $perPage);
+        $chat->markAsReadForRecipient((int)$appointmentId, (int)$user['id']);
+        return $this->success('ok', $messages);
+    }
+
+    /**
+     * POST /ajax/chats/send
+     */
+    public function sendChatMessage() {
+        if (!$this->isPost()) { return $this->error('طريقة الطلب غير صحيحة', 405); }
+        $this->validateCSRF();
+        $this->requireAuth();
+
+        require_once APP_PATH . '/models/Appointment.php';
+        require_once APP_PATH . '/models/ChatMessage.php';
+        require_once APP_PATH . '/models/Notification.php';
+        require_once APP_PATH . '/models/Doctor.php';
+        require_once APP_PATH . '/models/Patient.php';
+
+        $appointmentId = (int)$this->post('appointment_id');
+        $message = trim((string)$this->post('message'));
+        if (!$appointmentId || $message === '') { return $this->error('حقول ناقصة', 422); }
+
+        $appointmentModel = new Appointment();
+        $appt = $appointmentModel->getAppointmentDetails($appointmentId);
+        if (!$appt) { return $this->error('الموعد غير موجود', 404); }
+
+        $user = $this->auth->user();
+        $doctorModel = new Doctor();
+        $patientModel = new Patient();
+        if ($user['role'] === ROLE_PATIENT) {
+            $patient = $patientModel->getByUserId($user['id']);
+            if (!$patient || (int)$patient['id'] !== (int)$appt['patient_id']) { return $this->error('غير مصرح', 403); }
+            $recipientUserId = (int)($this->doctorModel->find((int)$appt['doctor_id'])['user_id'] ?? 0);
+        } elseif ($user['role'] === ROLE_DOCTOR) {
+            $doctor = $doctorModel->getByUserId($user['id']);
+            if (!$doctor || (int)$doctor['id'] !== (int)$appt['doctor_id']) { return $this->error('غير مصرح', 403); }
+            $recipientUserId = (int)($this->patientModel->find((int)$appt['patient_id'])['user_id'] ?? 0);
+        } else { return $this->error('غير مصرح', 403); }
+        if (!$recipientUserId) { return $this->error('تعذر تحديد المستلم', 404); }
+
+        $chat = new ChatMessage();
+        $msgId = $chat->createMessage([
+            'appointment_id' => $appointmentId,
+            'sender_user_id' => (int)$user['id'],
+            'recipient_user_id' => $recipientUserId,
+            'message' => $message
+        ]);
+        if (!$msgId) { return $this->error('فشل الإرسال', 500); }
+
+        $notif = new Notification();
+        $notif->createNotification($recipientUserId, 'chat_message', 'رسالة جديدة', 'لديك رسالة جديدة بخصوص الموعد #'.$appointmentId, ['appointment_id' => $appointmentId]);
+        return $this->success('تم الإرسال', ['message_id' => (int)$msgId]);
+    }
+
+    /**
+     * POST /ajax/chats/{appointment_id}/read
+     */
+    public function readChat($appointmentId) {
+        $this->requireAuth();
+        require_once APP_PATH . '/models/ChatMessage.php';
+        $chat = new ChatMessage();
+        $chat->markAsReadForRecipient((int)$appointmentId, (int)$this->auth->id());
+        return $this->success('ok');
+    }
+
+    // ----- Video (AJAX, session auth) -----
+
+    /**
+     * POST /ajax/video/rooms
+     */
+    public function createVideoRoom() {
+        if (!$this->isPost()) { return $this->error('طريقة الطلب غير صحيحة', 405); }
+        $this->validateCSRF();
+        $this->requireAuth();
+
+        require_once APP_PATH . '/models/VideoCall.php';
+        require_once APP_PATH . '/models/Appointment.php';
+        require_once APP_PATH . '/models/Notification.php';
+        require_once APP_PATH . '/models/Doctor.php';
+        require_once APP_PATH . '/models/Patient.php';
+
+        $appointmentId = (int)$this->post('appointment_id');
+        if (!$appointmentId) { return $this->error('رقم الموعد مطلوب', 422); }
+        $appointmentModel = new Appointment();
+        $appt = $appointmentModel->find($appointmentId);
+        if (!$appt) { return $this->error('الموعد غير موجود', 404); }
+
+        $user = $this->auth->user();
+        $authorized = false;
+        $doctorModel = new Doctor();
+        $patientModel = new Patient();
+        if ($user['role'] === ROLE_PATIENT) {
+            $patient = $patientModel->getByUserId($user['id']);
+            if ($patient && (int)$patient['id'] === (int)$appt['patient_id']) { $authorized = true; }
+        } elseif ($user['role'] === ROLE_DOCTOR) {
+            $doctor = $doctorModel->getByUserId($user['id']);
+            if ($doctor && (int)$doctor['id'] === (int)$appt['doctor_id']) { $authorized = true; }
+        } elseif ($user['role'] === ROLE_SUPER_ADMIN) { $authorized = true; }
+        if (!$authorized) { return $this->error('غير مصرح', 403); }
+
+        $vc = new VideoCall();
+        $existing = $vc->findByAppointment($appointmentId);
+        if ($existing) { return $this->success('تم الاسترجاع', ['room' => $existing]); }
+
+        $roomCode = 'VC-' . $appointmentId . '-' . bin2hex(random_bytes(4));
+        $roomId = $vc->createRoom($appointmentId, (int)$user['id'], $roomCode);
+        if (!$roomId) { return $this->error('فشل إنشاء الغرفة', 500); }
+
+        // Notify counterpart
+        $recipientUserId = null;
+        if ($user['role'] === ROLE_PATIENT) {
+            $recipientUserId = (int)($doctorModel->find((int)$appt['doctor_id'])['user_id'] ?? 0);
+        } elseif ($user['role'] === ROLE_DOCTOR) {
+            $recipientUserId = (int)($patientModel->find((int)$appt['patient_id'])['user_id'] ?? 0);
+        }
+        if ($recipientUserId) {
+            $n = new Notification();
+            $n->createNotification($recipientUserId, 'video_call', 'دعوة مكالمة فيديو', 'هناك مكالمة فيديو للموعد #'.$appointmentId, ['appointment_id'=>$appointmentId,'room_code'=>$roomCode]);
+        }
+
+        return $this->success('تم الإنشاء', ['room' => $vc->find($roomId)]);
+    }
+
+    /**
+     * GET /ajax/video/rooms/{appointment_id}
+     */
+    public function getVideoRoom($appointmentId) {
+        $this->requireAuth();
+        require_once APP_PATH . '/models/VideoCall.php';
+        $vc = new VideoCall();
+        $room = $vc->findByAppointment((int)$appointmentId);
+        if (!$room) { return $this->error('غير موجود', 404); }
+        return $this->success('ok', ['room' => $room]);
+    }
+
+    /**
+     * POST /ajax/video/rooms/{appointment_id}/status
+     */
+    public function updateVideoRoomStatus($appointmentId) {
+        if (!$this->isPost()) { return $this->error('طريقة الطلب غير صحيحة', 405); }
+        $this->validateCSRF();
+        $this->requireAuth();
+        require_once APP_PATH . '/models/VideoCall.php';
+        $status = strtolower(trim((string)$this->post('status','')));
+        $vc = new VideoCall();
+        $room = $vc->findByAppointment((int)$appointmentId);
+        if (!$room) { return $this->error('غير موجود', 404); }
+        if ($status === 'ongoing') { $vc->markStarted((int)$room['id']); }
+        elseif (in_array($status, ['ended','cancelled'])) { $vc->markEnded((int)$room['id']); }
+        else { return $this->error('حالة غير صحيحة', 422); }
+        return $this->success('تم التحديث', ['room' => $vc->find((int)$room['id'])]);
+    }
+
+
+
+
 }
-
-
