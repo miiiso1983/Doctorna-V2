@@ -258,8 +258,10 @@ class PatientController extends Controller {
         // Get doctor's schedule
         $schedule = $this->doctorModel->getSchedule($doctorId);
 
-        // Get doctor's reviews
-        $reviews = $this->doctorModel->getReviews($doctorId);
+        // Get doctor's reviews (approved) and statistics
+        $reviewModel = class_exists('Review') ? new Review() : null;
+        $reviews = $reviewModel ? $reviewModel->getDoctorReviews($doctorId, true, (int)$this->get('page', 1)) : ['data'=>[], 'total'=>0, 'per_page'=>10, 'current_page'=>1, 'last_page'=>1];
+        $reviewStats = $reviewModel ? $reviewModel->getDoctorReviewStats($doctorId) : ['total_reviews'=>0,'average_rating'=>0];
 
         // Get available time slots for next 30 days
         $availableSlots = $this->getAvailableTimeSlots($doctorId);
@@ -270,6 +272,7 @@ class PatientController extends Controller {
             'doctor' => $doctor,
             'schedule' => $schedule,
             'reviews' => $reviews,
+            'review_stats' => $reviewStats,
             'available_slots' => $availableSlots,
             'csrf_token' => $this->csrf->token()
         ];

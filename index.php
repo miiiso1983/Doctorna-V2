@@ -169,6 +169,8 @@ $router->get('/patient/symptoms', 'PatientController@symptoms');
 // Map search page for patients
 $router->get('/patient/map-search', 'PatientController@mapSearch');
 
+$router->post('/patient/appointments/book', 'PatientController@bookAppointment');
+
 $router->get('/patient/profile', 'PatientController@profile');
 $router->post('/patient/profile', 'PatientController@updateProfile');
 $router->get('/patient/appointments', 'PatientController@appointments');
