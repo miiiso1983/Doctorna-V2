@@ -240,6 +240,21 @@ CREATE TABLE IF NOT EXISTS chat_messages (
     INDEX idx_chat_sender (sender_user_id)
 );
 
+-- Video calls linked to appointments
+CREATE TABLE IF NOT EXISTS video_calls (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    appointment_id INT NOT NULL,
+    room_code VARCHAR(64) NOT NULL,
+    status ENUM('scheduled','ongoing','ended','cancelled') DEFAULT 'scheduled',
+    started_at TIMESTAMP NULL,
+    ended_at TIMESTAMP NULL,
+    created_by_user_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_vc_appt (appointment_id),
+    UNIQUE KEY unique_appt (appointment_id)
+);
+
+
 
 
 -- Doctor reviews and ratings

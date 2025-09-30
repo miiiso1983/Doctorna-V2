@@ -13,6 +13,7 @@ require_once APP_PATH . '/models/Specialization.php';
 require_once APP_PATH . '/models/HealthPost.php';
 require_once APP_PATH . '/models/Payment.php';
 require_once APP_PATH . '/models/ChatMessage.php';
+require_once APP_PATH . '/models/VideoCall.php';
 require_once APP_PATH . '/services/QiGateway.php';
 
 class ApiController extends Controller {
@@ -1274,6 +1275,119 @@ class ApiController extends Controller {
         $chat = new ChatMessage();
         $chat->markAsReadForRecipient((int)$appointmentId, (int)$user['id']);
         $this->apiSuccess('Marked as read');
+    }
+
+
+    // ----- Video Calls -----
+
+    /**
+     * Create or fetch a video call room for an appointment
+     * POST /api/video/rooms
+     */
+    public function createVideoRoom() {
+        if (!$this->isPost()) { $this->apiError('Method not allowed', 405); }
+        $user = $this->requireApiAuth();
+
+        $appointmentId = (int)$this->post('appointment_id');
+        if (!$appointmentId) { $this->apiError('Appointment ID is required', 422); }
+        $appt = $this->appointmentModel->find($appointmentId);
+        if (!$appt) { $this->apiError('Appointment not found', 404); }
+
+        // Authorization: only the doctor or patient of this appointment
+        $authorized = false;
+        if ($user['role'] === ROLE_PATIENT) {
+            $patient = $this->patientModel->getByUserId($user['id']);
+            if ($patient && (int)$patient['id'] === (int)$appt['patient_id']) { $authorized = true; }
+        } elseif ($user['role'] === ROLE_DOCTOR) {
+            $doctor = $this->doctorModel->getByUserId($user['id']);
+            if ($doctor && (int)$doctor['id'] === (int)$appt['doctor_id']) { $authorized = true; }
+        } elseif ($user['role'] === ROLE_SUPER_ADMIN) { $authorized = true; }
+        if (!$authorized) { $this->apiError('Forbidden', 403); }
+
+        $vc = new VideoCall();
+        $existing = $vc->findByAppointment($appointmentId);
+        if ($existing) {
+            $this->apiSuccess('Video room retrieved', ['room' => $existing]);
+        }
+
+        // Generate a simple room code (to be replaced with provider's room ID / token)
+        $roomCode = 'VC-' . $appointmentId . '-' . bin2hex(random_bytes(4));
+        $roomId = $vc->createRoom($appointmentId, (int)$user['id'], $roomCode);
+        if (!$roomId) { $this->apiError('Failed to create video room', 500); }
+
+        // Notify counterpart
+        require_once APP_PATH . '/models/Notification.php';
+        $notif = new Notification();
+        // Determine counterpart user id
+        $recipientUserId = null;
+        if ($user['role'] === ROLE_PATIENT) {
+            $recipientUserId = (int)($this->doctorModel->find((int)$appt['doctor_id'])['user_id'] ?? 0);
+        } elseif ($user['role'] === ROLE_DOCTOR) {
+            $recipientUserId = (int)($this->patientModel->find((int)$appt['patient_id'])['user_id'] ?? 0);
+        }
+        if ($recipientUserId) {
+            $notif->createNotification($recipientUserId, 'video_call', 'دعوة مكالمة فيديو', 'هناك مكالمة فيديو للموعد #' . $appointmentId, ['appointment_id' => $appointmentId, 'room_code' => $roomCode]);
+        }
+
+        $this->apiSuccess('Video room created', ['room' => $vc->find($roomId)], 201);
+    }
+
+    /**
+     * Get video call room by appointment
+     * GET /api/video/rooms/{appointment_id}
+     */
+    public function getVideoRoom($appointmentId) {
+        $user = $this->requireApiAuth();
+        $appt = $this->appointmentModel->find((int)$appointmentId);
+        if (!$appt) { $this->apiError('Appointment not found', 404); }
+        $authorized = false;
+        if ($user['role'] === ROLE_SUPER_ADMIN) { $authorized = true; }
+        elseif ($user['role'] === ROLE_PATIENT) {
+            $patient = $this->patientModel->getByUserId($user['id']);
+            if ($patient && (int)$patient['id'] === (int)$appt['patient_id']) { $authorized = true; }
+        } elseif ($user['role'] === ROLE_DOCTOR) {
+            $doctor = $this->doctorModel->getByUserId($user['id']);
+            if ($doctor && (int)$doctor['id'] === (int)$appt['doctor_id']) { $authorized = true; }
+        }
+        if (!$authorized) { $this->apiError('Forbidden', 403); }
+
+        $vc = new VideoCall();
+        $room = $vc->findByAppointment((int)$appointmentId);
+        if (!$room) { $this->apiError('Room not found', 404); }
+        $this->apiSuccess('Video room retrieved', ['room' => $room]);
+    }
+
+    /**
+     * Update room status to ongoing/ended
+     * POST /api/video/rooms/{appointment_id}/status
+     */
+    public function updateVideoRoomStatus($appointmentId) {
+        $user = $this->requireApiAuth();
+        $appt = $this->appointmentModel->find((int)$appointmentId);
+        if (!$appt) { $this->apiError('Appointment not found', 404); }
+        $authorized = false;
+        if ($user['role'] === ROLE_SUPER_ADMIN) { $authorized = true; }
+        elseif ($user['role'] === ROLE_PATIENT) {
+            $patient = $this->patientModel->getByUserId($user['id']);
+            if ($patient && (int)$patient['id'] === (int)$appt['patient_id']) { $authorized = true; }
+        } elseif ($user['role'] === ROLE_DOCTOR) {
+            $doctor = $this->doctorModel->getByUserId($user['id']);
+            if ($doctor && (int)$doctor['id'] === (int)$appt['doctor_id']) { $authorized = true; }
+        }
+        if (!$authorized) { $this->apiError('Forbidden', 403); }
+
+        $status = strtolower(trim((string)$this->post('status', '')));
+        $vc = new VideoCall();
+        $room = $vc->findByAppointment((int)$appointmentId);
+        if (!$room) { $this->apiError('Room not found', 404); }
+        if ($status === 'ongoing') {
+            $vc->markStarted((int)$room['id']);
+        } elseif ($status === 'ended' || $status === 'cancelled') {
+            $vc->markEnded((int)$room['id']);
+        } else {
+            $this->apiError('Invalid status', 422);
+        }
+        $this->apiSuccess('Status updated', ['room' => $vc->find((int)$room['id'])]);
     }
 
 }

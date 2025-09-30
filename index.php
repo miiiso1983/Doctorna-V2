@@ -234,6 +234,12 @@ $router->get('/api/chats/{appointment_id}', 'ApiController@chatMessages');
 $router->post('/api/chats/send', 'ApiController@sendChatMessage');
 $router->post('/api/chats/{appointment_id}/read', 'ApiController@readChat');
 
+// Video Call API
+$router->post('/api/video/rooms', 'ApiController@createVideoRoom');
+$router->get('/api/video/rooms/{appointment_id}', 'ApiController@getVideoRoom');
+$router->post('/api/video/rooms/{appointment_id}/status', 'ApiController@updateVideoRoomStatus');
+
+
 
 
 // AJAX routes
