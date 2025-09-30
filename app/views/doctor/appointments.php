@@ -160,7 +160,7 @@ function completeAppointment(appointmentId) {
     formData.append('prescription', prescription);
 
     formData.append('csrf_token', document.querySelector('meta[name="csrf-token"]').content);
-    fetch('<?= $this->url('/doctor/complete-appointment') ?>', { method: 'POST', body: formData })
+    fetch('<?= $this->url('/doctor/complete-appointment') ?>', { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: formData })
         .then(r => r.json()).then(d => { if (d.success) location.reload(); else alert(d.message||'خطأ'); })
         .catch(() => alert('حدث خطأ غير متوقع'));
 }

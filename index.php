@@ -142,6 +142,10 @@ $router->post('/admin/health-posts/{id}/delete', 'AdminController@deleteHealthPo
 // Doctor routes
 $router->get('/doctor', 'DoctorController@index');
 $router->get('/doctor/appointments', 'DoctorController@appointments');
+$router->get('/doctor/appointments/{id}', 'DoctorController@appointmentDetails');
+$router->post('/doctor/accept-appointment', 'DoctorController@acceptAppointment');
+$router->post('/doctor/reject-appointment', 'DoctorController@rejectAppointment');
+$router->post('/doctor/complete-appointment', 'DoctorController@completeAppointment');
 $router->get('/doctor/profile', 'DoctorController@profile');
 $router->post('/doctor/profile', 'DoctorController@updateProfile');
 $router->get('/doctor/schedule', 'DoctorController@schedule');

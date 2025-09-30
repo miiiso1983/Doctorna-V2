@@ -362,6 +362,7 @@
 
             fetch(`/doctor/${action}-appointment`, {
                 method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
                 body: formData
             })
             .then(response => response.json())

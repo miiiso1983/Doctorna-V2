@@ -118,6 +118,26 @@ class DoctorController extends Controller {
     }
 
     /**
+     * Appointment details page
+     */
+    public function appointmentDetails($id) {
+        $appointmentId = (int)$id;
+        if (!$appointmentId) { $this->redirect('/doctor/appointments'); }
+        $appointment = $this->appointmentModel->getAppointmentDetails($appointmentId);
+        if (!$appointment || (int)$appointment['doctor_id'] !== (int)$this->doctorProfile['id']) {
+            $this->flash('error', 'الموعد غير موجود أو غير مخول لك');
+            $this->redirect('/doctor/appointments');
+        }
+        $data = [
+            'title' => 'تفاصيل الموعد',
+            'doctor' => $this->doctorProfile,
+            'appointment' => $appointment
+        ];
+        $this->renderWithLayout('doctor.appointment-details', $data, 'doctor');
+    }
+
+
+    /**
      * Doctor profile management
      */
     public function profile() {
