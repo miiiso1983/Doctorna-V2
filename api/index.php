@@ -47,6 +47,7 @@ require_once API_ROOT . '/controllers/HealthPostController.php';
 require_once API_ROOT . '/controllers/NotificationController.php';
 require_once API_ROOT . '/controllers/SpecializationController.php';
 require_once API_ROOT . '/controllers/ReviewController.php';
+require_once API_ROOT . '/controllers/ChatController.php';
 
 // Load models (reuse existing models)
 require_once ROOT_PATH . '/app/models/User.php';
@@ -291,6 +292,38 @@ try {
                     break;
                 default:
                     Response::error('Invalid review endpoint', 404);
+            }
+            break;
+
+        case 'chat':
+            AuthMiddleware::authenticate();
+            $controller = new API\ChatController($db);
+            $action = $segments[1] ?? 'index';
+
+            switch ($action) {
+                case 'conversations':
+                case '':
+                    $controller->getConversations();
+                    break;
+                case 'messages':
+                    $conversationId = $segments[2] ?? null;
+                    $controller->getMessages($conversationId);
+                    break;
+                case 'send':
+                    $controller->sendMessage();
+                    break;
+                case 'mark-read':
+                    $conversationId = $segments[2] ?? null;
+                    $controller->markAsRead($conversationId);
+                    break;
+                case 'unread-count':
+                    $controller->getUnreadCount();
+                    break;
+                case 'upload':
+                    $controller->uploadAttachment();
+                    break;
+                default:
+                    Response::error('Invalid chat endpoint', 404);
             }
             break;
 

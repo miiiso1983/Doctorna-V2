@@ -7,6 +7,7 @@ import 'providers/appointment_provider.dart';
 import 'providers/health_post_provider.dart';
 import 'providers/notification_provider.dart';
 import 'providers/theme_provider.dart';
+import 'providers/chat_provider.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/register_screen.dart';
 import 'screens/home/home_screen.dart';
@@ -18,6 +19,8 @@ import 'screens/health_posts/health_post_details_screen.dart';
 import 'screens/notifications/notifications_screen.dart';
 import 'screens/reviews/doctor_reviews_screen.dart';
 import 'screens/reviews/add_review_screen.dart';
+import 'screens/chat/conversations_screen.dart';
+import 'screens/chat/chat_screen.dart';
 import 'services/api_service.dart';
 
 void main() async {
@@ -38,6 +41,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AppointmentProvider()),
         ChangeNotifierProvider(create: (_) => HealthPostProvider()),
         ChangeNotifierProvider(create: (_) => NotificationProvider()),
+        ChangeNotifierProvider(create: (_) => ChatProvider()),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
@@ -65,6 +69,7 @@ class MyApp extends StatelessWidget {
               '/edit-profile': (context) => const EditProfileScreen(),
               '/health-posts': (context) => const HealthPostsScreen(),
               '/notifications': (context) => const NotificationsScreen(),
+              '/conversations': (context) => const ConversationsScreen(),
             },
             onGenerateRoute: (settings) {
               if (settings.name == '/health-post-details') {
@@ -88,6 +93,17 @@ class MyApp extends StatelessWidget {
                   builder: (context) => AddReviewScreen(
                     doctorId: args['doctorId'],
                     doctorName: args['doctorName'],
+                  ),
+                );
+              }
+              if (settings.name == '/chat') {
+                final args = settings.arguments as Map<String, dynamic>;
+                return MaterialPageRoute(
+                  builder: (context) => ChatScreen(
+                    conversationId: args['conversationId'],
+                    userId: args['userId'],
+                    userName: args['userName'],
+                    userAvatar: args['userAvatar'],
                   ),
                 );
               }

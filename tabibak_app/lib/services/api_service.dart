@@ -173,6 +173,19 @@ class ApiService {
   }
 
   bool get isAuthenticated => _token != null;
+
+  // Get token (for external use like file uploads)
+  Future<String?> getToken() async {
+    if (_token == null) {
+      await init();
+    }
+    return _token;
+  }
+
+  // Parse response (for external use)
+  Map<String, dynamic> parseResponse(String responseBody) {
+    return json.decode(responseBody);
+  }
 }
 
 class ApiException implements Exception {

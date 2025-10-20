@@ -52,6 +52,14 @@ class ApiConfig {
   static String deleteReview(int id) => '$apiUrl/reviews/delete/$id';
   static String myReview(int doctorId) => '$apiUrl/reviews/my-review/$doctorId';
 
+  // Chat
+  static const String chatConversations = '$apiUrl/chat/conversations';
+  static String chatMessages(int conversationId) => '$apiUrl/chat/messages/$conversationId';
+  static const String chatSend = '$apiUrl/chat/send';
+  static String chatMarkRead(int conversationId) => '$apiUrl/chat/mark-read/$conversationId';
+  static const String chatUnreadCount = '$apiUrl/chat/unread-count';
+  static const String chatUpload = '$apiUrl/chat/upload';
+
   // Timeouts
   static const Duration connectionTimeout = Duration(seconds: 30);
   static const Duration receiveTimeout = Duration(seconds: 30);

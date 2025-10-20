@@ -7,6 +7,8 @@ class ChatMessage {
   final String? attachmentType;
   final bool isRead;
   final DateTime createdAt;
+  final String? senderName;
+  final String? senderAvatar;
 
   ChatMessage({
     required this.id,
@@ -17,24 +19,28 @@ class ChatMessage {
     this.attachmentType,
     required this.isRead,
     required this.createdAt,
+    this.senderName,
+    this.senderAvatar,
   });
 
   factory ChatMessage.fromJson(Map<String, dynamic> json) {
     return ChatMessage(
       id: json['id'] is String ? int.parse(json['id']) : json['id'],
-      senderId: json['sender_id'] is String 
-          ? int.parse(json['sender_id']) 
+      senderId: json['sender_id'] is String
+          ? int.parse(json['sender_id'])
           : json['sender_id'],
-      receiverId: json['receiver_id'] is String 
-          ? int.parse(json['receiver_id']) 
+      receiverId: json['receiver_id'] is String
+          ? int.parse(json['receiver_id'])
           : json['receiver_id'],
       message: json['message'] ?? '',
       attachmentUrl: json['attachment_url'],
       attachmentType: json['attachment_type'],
       isRead: json['is_read'] == 1 || json['is_read'] == true,
-      createdAt: json['created_at'] != null 
-          ? DateTime.parse(json['created_at']) 
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'])
           : DateTime.now(),
+      senderName: json['sender_name'],
+      senderAvatar: json['sender_avatar'],
     );
   }
 
@@ -86,20 +92,22 @@ class Conversation {
 
   factory Conversation.fromJson(Map<String, dynamic> json) {
     return Conversation(
-      userId: json['user_id'] is String ? int.parse(json['user_id']) : json['user_id'],
-      userName: json['user_name'] ?? '',
-      userAvatar: json['user_avatar'],
+      userId: json['other_user_id'] is String ? int.parse(json['other_user_id']) : json['other_user_id'],
+      userName: json['other_user_name'] ?? '',
+      userAvatar: json['other_user_avatar'],
       lastMessage: json['last_message'],
-      lastMessageTime: json['last_message_time'] != null 
-          ? DateTime.parse(json['last_message_time']) 
+      lastMessageTime: json['last_message_time'] != null
+          ? DateTime.parse(json['last_message_time'])
           : null,
-      unreadCount: json['unread_count'] is String 
-          ? int.parse(json['unread_count']) 
+      unreadCount: json['unread_count'] is String
+          ? int.parse(json['unread_count'])
           : (json['unread_count'] ?? 0),
     );
   }
 
-  String get formattedTime {
+  int get id => userId;
+
+  String get formattedLastMessageTime {
     if (lastMessageTime == null) return '';
     
     final now = DateTime.now();

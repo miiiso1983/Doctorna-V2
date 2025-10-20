@@ -170,6 +170,14 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
             ListTile(
+              leading: const Icon(Icons.chat),
+              title: const Text('المحادثات'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/conversations');
+              },
+            ),
+            ListTile(
               leading: Icon(
                 context.watch<ThemeProvider>().isDarkMode
                     ? Icons.light_mode
