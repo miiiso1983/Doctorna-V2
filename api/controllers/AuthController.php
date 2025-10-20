@@ -16,16 +16,25 @@ class AuthController {
      * POST /api/auth/login
      */
     public function login() {
-        $data = json_decode(file_get_contents('php://input'), true);
-        
+        $input = file_get_contents('php://input');
+        $data = json_decode($input, true);
+
+        // Debug logging
+        error_log("Login attempt - Raw input: " . $input);
+        error_log("Login attempt - Decoded data: " . print_r($data, true));
+
+        if (!$data) {
+            \Response::error('Invalid JSON data', 400);
+        }
+
         $validator = new \Validator($data);
         $validator->required(['email', 'password'])
                   ->email('email');
-        
+
         if ($validator->fails()) {
             \Response::validationError($validator->errors());
         }
-        
+
         $email = $data['email'];
         $password = $data['password'];
         
