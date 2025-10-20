@@ -11,6 +11,8 @@ class User {
   final double? latitude;
   final double? longitude;
   final String status;
+  final String? gender;
+  final DateTime? dateOfBirth;
   final DateTime? createdAt;
   final DateTime? lastLogin;
 
@@ -27,6 +29,8 @@ class User {
     this.latitude,
     this.longitude,
     required this.status,
+    this.gender,
+    this.dateOfBirth,
     this.createdAt,
     this.lastLogin,
   });
@@ -45,6 +49,8 @@ class User {
       latitude: json['latitude'] != null ? double.tryParse(json['latitude'].toString()) : null,
       longitude: json['longitude'] != null ? double.tryParse(json['longitude'].toString()) : null,
       status: json['status'] ?? 'active',
+      gender: json['gender'],
+      dateOfBirth: json['date_of_birth'] != null ? DateTime.tryParse(json['date_of_birth']) : null,
       createdAt: json['created_at'] != null ? DateTime.tryParse(json['created_at']) : null,
       lastLogin: json['last_login'] != null ? DateTime.tryParse(json['last_login']) : null,
     );
@@ -64,6 +70,8 @@ class User {
       'latitude': latitude,
       'longitude': longitude,
       'status': status,
+      'gender': gender,
+      'date_of_birth': dateOfBirth?.toIso8601String().split('T')[0],
       'created_at': createdAt?.toIso8601String(),
       'last_login': lastLogin?.toIso8601String(),
     };

@@ -90,7 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
               title: const Text('مواعيدي'),
               onTap: () {
                 Navigator.pop(context);
-                // Navigate to appointments
+                Navigator.pushNamed(context, '/appointments');
               },
             ),
             ListTile(
@@ -98,7 +98,7 @@ class _HomeScreenState extends State<HomeScreen> {
               title: const Text('الملف الشخصي'),
               onTap: () {
                 Navigator.pop(context);
-                // Navigate to profile
+                Navigator.pushNamed(context, '/profile');
               },
             ),
             const Divider(),
@@ -229,7 +229,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         title: 'مواعيدي',
                         color: AppColors.secondary,
                         onTap: () {
-                          // Navigate to appointments
+                          Navigator.pushNamed(context, '/appointments');
                         },
                       ),
                     ),
