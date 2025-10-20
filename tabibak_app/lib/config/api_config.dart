@@ -19,6 +19,7 @@ class ApiConfig {
   // Doctors
   static const String doctorsList = '$apiUrl/doctors/list';
   static const String doctorsSearch = '$apiUrl/doctors/search';
+  static const String doctorsSpecializations = '$apiUrl/doctors/specializations';
   static String doctorDetails(int id) => '$apiUrl/doctors/$id';
   static String doctorAvailability(int id) => '$apiUrl/doctors/availability/$id';
   static const String specializations = '$apiUrl/doctors/specializations';

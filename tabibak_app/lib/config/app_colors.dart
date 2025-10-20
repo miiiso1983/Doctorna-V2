@@ -38,10 +38,10 @@ class AppColors {
   static const Color borderDark = Color(0xFFBDBDBD);
   
   // Appointment Status Colors
-  static const Color pending = Color(0xFFFF9800);
-  static const Color confirmed = Color(0xFF2196F3);
-  static const Color completed = Color(0xFF4CAF50);
-  static const Color cancelled = Color(0xFFF44336);
+  static const Color appointmentPending = Color(0xFFFF9800);
+  static const Color appointmentConfirmed = Color(0xFF2196F3);
+  static const Color appointmentCompleted = Color(0xFF4CAF50);
+  static const Color appointmentCancelled = Color(0xFFF44336);
   
   // Gradient
   static const LinearGradient primaryGradient = LinearGradient(
