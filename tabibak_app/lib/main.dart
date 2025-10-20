@@ -4,12 +4,18 @@ import 'package:provider/provider.dart';
 import 'config/app_colors.dart';
 import 'providers/auth_provider.dart';
 import 'providers/appointment_provider.dart';
+import 'providers/health_post_provider.dart';
+import 'providers/notification_provider.dart';
+import 'providers/theme_provider.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/register_screen.dart';
 import 'screens/home/home_screen.dart';
 import 'screens/appointments/appointments_screen.dart';
 import 'screens/profile/profile_screen.dart';
 import 'screens/profile/edit_profile_screen.dart';
+import 'screens/health_posts/health_posts_screen.dart';
+import 'screens/health_posts/health_post_details_screen.dart';
+import 'screens/notifications/notifications_screen.dart';
 import 'services/api_service.dart';
 
 void main() async {
@@ -25,33 +31,49 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()..init()),
         ChangeNotifierProvider(create: (_) => AppointmentProvider()),
+        ChangeNotifierProvider(create: (_) => HealthPostProvider()),
+        ChangeNotifierProvider(create: (_) => NotificationProvider()),
       ],
-      child: MaterialApp(
-        title: 'طبيبك',
-        debugShowCheckedModeBanner: false,
-        locale: const Locale('ar', 'IQ'),
-        supportedLocales: const [Locale('ar', 'IQ'), Locale('en', 'US')],
-        localizationsDelegates: const [
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        theme: ThemeData(
-          primaryColor: AppColors.primary,
-          colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
-          useMaterial3: true,
-        ),
-        initialRoute: '/',
-        routes: {
-          '/': (context) => const SplashScreen(),
-          '/login': (context) => const LoginScreen(),
-          '/register': (context) => const RegisterScreen(),
-          '/home': (context) => const HomeScreen(),
-          '/appointments': (context) => const AppointmentsScreen(),
-          '/profile': (context) => const ProfileScreen(),
-          '/edit-profile': (context) => const EditProfileScreen(),
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, child) {
+          return MaterialApp(
+            title: 'طبيبك',
+            debugShowCheckedModeBanner: false,
+            locale: const Locale('ar', 'IQ'),
+            supportedLocales: const [Locale('ar', 'IQ'), Locale('en', 'US')],
+            localizationsDelegates: const [
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            theme: themeProvider.lightTheme,
+            darkTheme: themeProvider.darkTheme,
+            themeMode: themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+            initialRoute: '/',
+            routes: {
+              '/': (context) => const SplashScreen(),
+              '/login': (context) => const LoginScreen(),
+              '/register': (context) => const RegisterScreen(),
+              '/home': (context) => const HomeScreen(),
+              '/appointments': (context) => const AppointmentsScreen(),
+              '/profile': (context) => const ProfileScreen(),
+              '/edit-profile': (context) => const EditProfileScreen(),
+              '/health-posts': (context) => const HealthPostsScreen(),
+              '/notifications': (context) => const NotificationsScreen(),
+            },
+            onGenerateRoute: (settings) {
+              if (settings.name == '/health-post-details') {
+                final postId = settings.arguments as int;
+                return MaterialPageRoute(
+                  builder: (context) => HealthPostDetailsScreen(postId: postId),
+                );
+              }
+              return null;
+            },
+          );
         },
       ),
     );

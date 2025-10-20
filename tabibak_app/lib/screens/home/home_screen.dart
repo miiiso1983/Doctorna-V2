@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/app_colors.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/notification_provider.dart';
+import '../../providers/theme_provider.dart';
 import '../../models/specialization.dart';
 import '../../services/doctor_service.dart';
 import '../doctors/doctors_list_screen.dart';
@@ -41,17 +43,49 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
+    final notificationProvider = context.watch<NotificationProvider>();
     final user = authProvider.user;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('طبيبك'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () {
-              // Navigate to notifications
-            },
+          Stack(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.notifications_outlined),
+                onPressed: () {
+                  Navigator.pushNamed(context, '/notifications');
+                },
+              ),
+              if (notificationProvider.unreadCount > 0)
+                Positioned(
+                  right: 8,
+                  top: 8,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 16,
+                      minHeight: 16,
+                    ),
+                    child: Text(
+                      notificationProvider.unreadCount > 99
+                          ? '99+'
+                          : '${notificationProvider.unreadCount}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+            ],
           ),
         ],
       ),
@@ -107,7 +141,49 @@ class _HomeScreenState extends State<HomeScreen> {
               title: const Text('المنشورات الصحية'),
               onTap: () {
                 Navigator.pop(context);
-                // Navigate to health posts
+                Navigator.pushNamed(context, '/health-posts');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.notifications),
+              title: const Text('الإشعارات'),
+              trailing: notificationProvider.unreadCount > 0
+                  ? Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '${notificationProvider.unreadCount}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    )
+                  : null,
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/notifications');
+              },
+            ),
+            ListTile(
+              leading: Icon(
+                context.watch<ThemeProvider>().isDarkMode
+                    ? Icons.light_mode
+                    : Icons.dark_mode,
+              ),
+              title: const Text('الوضع الليلي'),
+              trailing: Switch(
+                value: context.watch<ThemeProvider>().isDarkMode,
+                onChanged: (value) {
+                  context.read<ThemeProvider>().toggleTheme();
+                },
+              ),
+              onTap: () {
+                context.read<ThemeProvider>().toggleTheme();
               },
             ),
             ListTile(
@@ -115,7 +191,17 @@ class _HomeScreenState extends State<HomeScreen> {
               title: const Text('عن التطبيق'),
               onTap: () {
                 Navigator.pop(context);
-                // Show about dialog
+                showAboutDialog(
+                  context: context,
+                  applicationName: 'طبيبك',
+                  applicationVersion: '1.0.0',
+                  applicationIcon: const Icon(Icons.medical_services, size: 48),
+                  children: [
+                    const Text('منصة حجز المواعيد الطبية'),
+                    const SizedBox(height: 8),
+                    const Text('تطبيق شامل لحجز المواعيد مع الأطباء وإدارة الصحة'),
+                  ],
+                );
               },
             ),
             const Divider(),
