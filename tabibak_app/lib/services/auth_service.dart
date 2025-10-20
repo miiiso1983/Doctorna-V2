@@ -10,6 +10,36 @@ class AuthService {
     required String email,
     required String password,
   }) async {
+    // TEMPORARY: Mock login for development
+    // TODO: Remove this and use real API
+    print('🔐 Mock Login: $email');
+
+    // Simulate network delay
+    await Future.delayed(const Duration(seconds: 1));
+
+    // Mock successful login
+    final mockUser = User(
+      id: 1,
+      name: 'مستخدم تجريبي',
+      email: email,
+      phone: '1234567890',
+      role: 'patient',
+      status: 'active',
+      createdAt: DateTime.now(),
+    );
+
+    // Save mock tokens
+    await _apiService.saveTokens(
+      'mock_token_123',
+      'mock_refresh_token_456',
+    );
+
+    return {
+      'user': mockUser,
+      'profile': null,
+    };
+
+    /* REAL API CODE - Uncomment when API is working
     final response = await _apiService.post(
       ApiConfig.login,
       body: {
@@ -20,7 +50,7 @@ class AuthService {
 
     if (response['success'] == true) {
       final data = response['data'];
-      
+
       // Save tokens
       await _apiService.saveTokens(
         data['token'],
@@ -37,6 +67,7 @@ class AuthService {
       message: response['message'] ?? 'فشل تسجيل الدخول',
       statusCode: 401,
     );
+    */
   }
 
   // Register

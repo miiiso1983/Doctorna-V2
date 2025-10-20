@@ -77,14 +77,21 @@ class ApiService {
     bool requiresAuth = false,
   }) async {
     try {
+      print('🌐 POST Request to: $url');
+      print('📦 Body: ${jsonEncode(body)}');
+
       final response = await http.post(
         Uri.parse(url),
         headers: _getHeaders(includeAuth: requiresAuth),
         body: jsonEncode(body),
       ).timeout(ApiConfig.connectionTimeout);
 
+      print('✅ Response Status: ${response.statusCode}');
+      print('📄 Response Body: ${response.body}');
+
       return _handleResponse(response);
     } catch (e) {
+      print('❌ Error: $e');
       throw _handleError(e);
     }
   }
