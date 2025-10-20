@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../config/app_colors.dart';
 import '../../providers/appointment_provider.dart';
 import '../../widgets/appointment_card.dart';
+import '../reviews/add_review_screen.dart';
 
 class AppointmentsScreen extends StatefulWidget {
   const AppointmentsScreen({super.key});
@@ -115,6 +116,28 @@ class _AppointmentsScreenState extends State<AppointmentsScreen>
           ),
         );
       }
+    }
+  }
+
+  Future<void> _handleAddReview(appointment) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddReviewScreen(
+          doctorId: appointment.doctorId,
+          doctorName: appointment.doctorName,
+        ),
+      ),
+    );
+
+    if (result == true && mounted) {
+      // Review added successfully
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('شكراً لتقييمك!'),
+          backgroundColor: AppColors.success,
+        ),
+      );
     }
   }
 
@@ -233,6 +256,9 @@ class _AppointmentsScreenState extends State<AppointmentsScreen>
                   },
                   onCancel: appointment.isPending
                       ? () => _handleCancelAppointment(appointment.id)
+                      : null,
+                  onReview: appointment.isCompleted
+                      ? () => _handleAddReview(appointment)
                       : null,
                 );
               },

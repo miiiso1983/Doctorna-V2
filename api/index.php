@@ -46,6 +46,7 @@ require_once API_ROOT . '/controllers/AppointmentController.php';
 require_once API_ROOT . '/controllers/HealthPostController.php';
 require_once API_ROOT . '/controllers/NotificationController.php';
 require_once API_ROOT . '/controllers/SpecializationController.php';
+require_once API_ROOT . '/controllers/ReviewController.php';
 
 // Load models (reuse existing models)
 require_once ROOT_PATH . '/app/models/User.php';
@@ -260,7 +261,39 @@ try {
             $controller = new API\SpecializationController($db);
             $controller->list();
             break;
-            
+
+        case 'reviews':
+            $controller = new API\ReviewController($db);
+            $action = $segments[1] ?? 'index';
+
+            switch ($action) {
+                case 'doctor':
+                    $doctorId = $segments[2] ?? null;
+                    if ($segments[3] ?? '' === 'summary') {
+                        $controller->getDoctorRatingSummary($doctorId);
+                    } else {
+                        $controller->getDoctorReviews($doctorId);
+                    }
+                    break;
+                case 'add':
+                    AuthMiddleware::authenticate();
+                    $controller->addReview();
+                    break;
+                case 'delete':
+                    AuthMiddleware::authenticate();
+                    $id = $segments[2] ?? null;
+                    $controller->deleteReview($id);
+                    break;
+                case 'my-review':
+                    AuthMiddleware::authenticate();
+                    $doctorId = $segments[2] ?? null;
+                    $controller->getMyReview($doctorId);
+                    break;
+                default:
+                    Response::error('Invalid review endpoint', 404);
+            }
+            break;
+
         default:
             Response::error('Resource not found', 404);
     }

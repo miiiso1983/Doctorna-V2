@@ -7,12 +7,14 @@ class AppointmentCard extends StatelessWidget {
   final Appointment appointment;
   final VoidCallback? onTap;
   final VoidCallback? onCancel;
+  final VoidCallback? onReview;
 
   const AppointmentCard({
     super.key,
     required this.appointment,
     this.onTap,
     this.onCancel,
+    this.onReview,
   });
 
   Color _getStatusColor() {
@@ -154,6 +156,21 @@ class AppointmentCard extends StatelessWidget {
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.error,
                       side: const BorderSide(color: AppColors.error),
+                    ),
+                  ),
+                ),
+              ],
+              if (appointment.isCompleted && onReview != null) ...[
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: onReview,
+                    icon: const Icon(Icons.star, size: 18),
+                    label: const Text('تقييم الطبيب'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.warning,
+                      foregroundColor: Colors.white,
                     ),
                   ),
                 ),

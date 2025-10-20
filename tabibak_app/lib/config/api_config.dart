@@ -44,7 +44,14 @@ class ApiConfig {
   static const String unreadCount = '$apiUrl/notifications/unread-count';
   static String markAsRead(int id) => '$apiUrl/notifications/$id/mark-read';
   static const String markAllAsRead = '$apiUrl/notifications/mark-all-read';
-  
+
+  // Reviews
+  static String doctorReviews(int doctorId) => '$apiUrl/reviews/doctor/$doctorId';
+  static String doctorRatingSummary(int doctorId) => '$apiUrl/reviews/doctor/$doctorId/summary';
+  static const String addReview = '$apiUrl/reviews/add';
+  static String deleteReview(int id) => '$apiUrl/reviews/delete/$id';
+  static String myReview(int doctorId) => '$apiUrl/reviews/my-review/$doctorId';
+
   // Timeouts
   static const Duration connectionTimeout = Duration(seconds: 30);
   static const Duration receiveTimeout = Duration(seconds: 30);

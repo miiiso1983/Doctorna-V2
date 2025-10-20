@@ -3,6 +3,7 @@ import '../../config/app_colors.dart';
 import '../../models/doctor.dart';
 import '../../services/doctor_service.dart';
 import '../appointments/book_appointment_screen.dart';
+import '../reviews/doctor_reviews_screen.dart';
 
 class DoctorDetailsScreen extends StatefulWidget {
   final int doctorId;
@@ -114,10 +115,23 @@ class _DoctorDetailsScreenState extends State<DoctorDetailsScreen> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                _InfoChip(
-                                  icon: Icons.star,
-                                  label: _doctor!.displayRating,
-                                  color: AppColors.warning,
+                                GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => DoctorReviewsScreen(
+                                          doctorId: _doctor!.id,
+                                          doctorName: _doctor!.name,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: _InfoChip(
+                                    icon: Icons.star,
+                                    label: _doctor!.displayRating,
+                                    color: AppColors.warning,
+                                  ),
                                 ),
                                 const SizedBox(width: 16),
                                 _InfoChip(

@@ -16,6 +16,8 @@ import 'screens/profile/edit_profile_screen.dart';
 import 'screens/health_posts/health_posts_screen.dart';
 import 'screens/health_posts/health_post_details_screen.dart';
 import 'screens/notifications/notifications_screen.dart';
+import 'screens/reviews/doctor_reviews_screen.dart';
+import 'screens/reviews/add_review_screen.dart';
 import 'services/api_service.dart';
 
 void main() async {
@@ -69,6 +71,24 @@ class MyApp extends StatelessWidget {
                 final postId = settings.arguments as int;
                 return MaterialPageRoute(
                   builder: (context) => HealthPostDetailsScreen(postId: postId),
+                );
+              }
+              if (settings.name == '/doctor-reviews') {
+                final args = settings.arguments as Map<String, dynamic>;
+                return MaterialPageRoute(
+                  builder: (context) => DoctorReviewsScreen(
+                    doctorId: args['doctorId'],
+                    doctorName: args['doctorName'],
+                  ),
+                );
+              }
+              if (settings.name == '/add-review') {
+                final args = settings.arguments as Map<String, dynamic>;
+                return MaterialPageRoute(
+                  builder: (context) => AddReviewScreen(
+                    doctorId: args['doctorId'],
+                    doctorName: args['doctorName'],
+                  ),
                 );
               }
               return null;
