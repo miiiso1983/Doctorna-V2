@@ -60,6 +60,14 @@ class ApiConfig {
   static const String chatUnreadCount = '$apiUrl/chat/unread-count';
   static const String chatUpload = '$apiUrl/chat/upload';
 
+  // Video Call
+  static const String videoCallInitiate = '$apiUrl/video-call/initiate';
+  static String videoCallAccept(int callId) => '$apiUrl/video-call/accept/$callId';
+  static String videoCallReject(int callId) => '$apiUrl/video-call/reject/$callId';
+  static String videoCallEnd(int callId) => '$apiUrl/video-call/end/$callId';
+  static String videoCallDetails(int callId) => '$apiUrl/video-call/details/$callId';
+  static const String videoCallHistory = '$apiUrl/video-call/history';
+
   // Timeouts
   static const Duration connectionTimeout = Duration(seconds: 30);
   static const Duration receiveTimeout = Duration(seconds: 30);

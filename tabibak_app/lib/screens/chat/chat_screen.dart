@@ -6,6 +6,8 @@ import '../../config/app_colors.dart';
 import '../../providers/chat_provider.dart';
 import '../../models/chat_message.dart';
 import '../../services/chat_service.dart';
+import '../../services/video_call_service.dart';
+import '../video_call/video_call_screen.dart';
 
 class ChatScreen extends StatefulWidget {
   final int conversationId;
@@ -30,6 +32,7 @@ class _ChatScreenState extends State<ChatScreen> {
   final ScrollController _scrollController = ScrollController();
   final ChatService _chatService = ChatService();
   final ImagePicker _imagePicker = ImagePicker();
+  final VideoCallService _videoCallService = VideoCallService();
 
   bool _isSending = false;
   bool _isUploading = false;
@@ -94,6 +97,49 @@ class _ChatScreenState extends State<ChatScreen> {
       setState(() {
         _isSending = false;
       });
+    }
+  }
+
+  Future<void> _initiateVideoCall() async {
+    try {
+      // Show loading
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+
+      // Initiate call
+      final call = await _videoCallService.initiateCall(widget.userId);
+
+      if (mounted) {
+        // Close loading
+        Navigator.of(context).pop();
+
+        // Navigate to video call screen
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => VideoCallScreen(
+              call: call,
+              isCaller: true,
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        // Close loading
+        Navigator.of(context).pop();
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('فشل بدء المكالمة: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -180,6 +226,13 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ],
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.videocam),
+            onPressed: _initiateVideoCall,
+            tooltip: 'مكالمة فيديو',
+          ),
+        ],
       ),
       body: Column(
         children: [

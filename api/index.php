@@ -327,6 +327,39 @@ try {
             }
             break;
 
+        case 'video-call':
+            AuthMiddleware::authenticate();
+            $controller = new API\VideoCallController($db);
+            $action = $segments[1] ?? 'index';
+
+            switch ($action) {
+                case 'initiate':
+                    $controller->initiateCall();
+                    break;
+                case 'accept':
+                    $callId = $segments[2] ?? null;
+                    $controller->acceptCall($callId);
+                    break;
+                case 'reject':
+                    $callId = $segments[2] ?? null;
+                    $controller->rejectCall($callId);
+                    break;
+                case 'end':
+                    $callId = $segments[2] ?? null;
+                    $controller->endCall($callId);
+                    break;
+                case 'details':
+                    $callId = $segments[2] ?? null;
+                    $controller->getCallDetails($callId);
+                    break;
+                case 'history':
+                    $controller->getCallHistory();
+                    break;
+                default:
+                    Response::error('Invalid video call endpoint', 404);
+            }
+            break;
+
         default:
             Response::error('Resource not found', 404);
     }
