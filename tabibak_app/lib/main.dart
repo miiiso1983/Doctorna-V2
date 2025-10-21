@@ -21,7 +21,11 @@ import 'screens/reviews/doctor_reviews_screen.dart';
 import 'screens/reviews/add_review_screen.dart';
 import 'screens/chat/conversations_screen.dart';
 import 'screens/chat/chat_screen.dart';
+import 'screens/admin/admin_dashboard_screen.dart';
+import 'screens/doctor/doctor_dashboard_screen.dart';
+import 'screens/patient/patient_dashboard_screen.dart';
 import 'services/api_service.dart';
+import 'utils/role_router.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -135,8 +139,12 @@ class _SplashScreenState extends State<SplashScreen> {
 
     final authProvider = context.read<AuthProvider>();
 
-    if (authProvider.isAuthenticated) {
-      Navigator.of(context).pushReplacementNamed('/home');
+    if (authProvider.isAuthenticated && authProvider.user != null) {
+      // Navigate to appropriate dashboard based on user role
+      final dashboard = RoleRouter.getDashboardForRole(authProvider.user!);
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => dashboard),
+      );
     } else {
       Navigator.of(context).pushReplacementNamed('/login');
     }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/app_colors.dart';
 import '../../providers/auth_provider.dart';
+import '../../utils/role_router.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -35,9 +36,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (!mounted) return;
 
-    if (success) {
-      // Navigate to home
-      Navigator.of(context).pushReplacementNamed('/home');
+    if (success && authProvider.user != null) {
+      // Navigate to appropriate dashboard based on user role
+      final dashboard = RoleRouter.getDashboardForRole(authProvider.user!);
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => dashboard),
+      );
     } else {
       // Show error
       ScaffoldMessenger.of(context).showSnackBar(

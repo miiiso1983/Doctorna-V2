@@ -17,13 +17,28 @@ class AuthService {
     // Simulate network delay
     await Future.delayed(const Duration(seconds: 1));
 
+    // Determine role based on email
+    String role = 'patient'; // Default
+    String name = 'مستخدم تجريبي';
+
+    if (email.contains('admin')) {
+      role = 'super_admin';
+      name = 'مدير النظام';
+    } else if (email.contains('doctor') || email.contains('dr')) {
+      role = 'doctor';
+      name = 'د. أحمد محمود';
+    } else {
+      role = 'patient';
+      name = 'مريض تجريبي';
+    }
+
     // Mock successful login
     final mockUser = User(
       id: 1,
-      name: 'مستخدم تجريبي',
+      name: name,
       email: email,
       phone: '1234567890',
-      role: 'patient',
+      role: role,
       status: 'active',
       createdAt: DateTime.now(),
     );
