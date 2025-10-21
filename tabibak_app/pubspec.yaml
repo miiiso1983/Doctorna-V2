@@ -67,6 +67,10 @@ dependencies:
   agora_rtc_engine: ^6.3.2
   permission_handler: ^11.3.0
 
+  # Charts & Animations
+  fl_chart: ^0.66.0
+  animate_do: ^3.1.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

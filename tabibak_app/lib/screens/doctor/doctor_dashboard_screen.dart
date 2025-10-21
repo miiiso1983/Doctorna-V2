@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:fl_chart/fl_chart.dart';
+import 'package:animate_do/animate_do.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/appointment_provider.dart';
 
@@ -80,55 +82,133 @@ class DoctorHomeTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'مرحباً بك',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
+          // Welcome Header
+          FadeInDown(
+            duration: const Duration(milliseconds: 500),
+            child: Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF11998e), Color(0xFF38ef7d)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF11998e).withOpacity(0.3),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'مرحباً د. أحمد 👨‍⚕️',
+                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'لديك 8 مواعيد اليوم',
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                color: Colors.white.withOpacity(0.9),
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: const Icon(
+                      Icons.medical_services,
+                      size: 40,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
+
+          // Statistics Cards
           GridView.count(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             crossAxisCount: 2,
             crossAxisSpacing: 16,
             mainAxisSpacing: 16,
+            childAspectRatio: 1.3,
             children: [
-              _buildStatCard(
-                context,
-                'مواعيد اليوم',
-                '8',
-                Icons.calendar_today,
-                Colors.blue,
+              FadeInUp(
+                delay: const Duration(milliseconds: 100),
+                child: _buildModernStatCard(
+                  context,
+                  'مواعيد اليوم',
+                  '8',
+                  Icons.calendar_today_rounded,
+                  const LinearGradient(
+                    colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                  ),
+                ),
               ),
-              _buildStatCard(
-                context,
-                'المرضى',
-                '156',
-                Icons.people,
-                Colors.green,
+              FadeInUp(
+                delay: const Duration(milliseconds: 200),
+                child: _buildModernStatCard(
+                  context,
+                  'المرضى',
+                  '156',
+                  Icons.people_rounded,
+                  const LinearGradient(
+                    colors: [Color(0xFFf093fb), Color(0xFFf5576c)],
+                  ),
+                ),
               ),
-              _buildStatCard(
-                context,
-                'التقييمات',
-                '4.8',
-                Icons.star,
-                Colors.orange,
+              FadeInUp(
+                delay: const Duration(milliseconds: 300),
+                child: _buildModernStatCard(
+                  context,
+                  'التقييمات',
+                  '4.8 ⭐',
+                  Icons.star_rounded,
+                  const LinearGradient(
+                    colors: [Color(0xFFfad0c4), Color(0xFFffd1ff)],
+                  ),
+                ),
               ),
-              _buildStatCard(
-                context,
-                'المنشورات',
-                '12',
-                Icons.article,
-                Colors.purple,
+              FadeInUp(
+                delay: const Duration(milliseconds: 400),
+                child: _buildModernStatCard(
+                  context,
+                  'المنشورات',
+                  '12',
+                  Icons.article_rounded,
+                  const LinearGradient(
+                    colors: [Color(0xFFa8edea), Color(0xFFfed6e3)],
+                  ),
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 32),
+
+          // Today's Appointments
           Text(
             'مواعيد اليوم',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -142,34 +222,59 @@ class DoctorHomeTab extends StatelessWidget {
     );
   }
 
-  Widget _buildStatCard(
+  Widget _buildModernStatCard(
     BuildContext context,
     String title,
     String value,
     IconData icon,
-    Color color,
+    Gradient gradient,
   ) {
-    return Card(
-      elevation: 2,
+    return Container(
+      decoration: BoxDecoration(
+        gradient: gradient,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: gradient.colors.first.withOpacity(0.3),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Icon(icon, size: 48, color: color),
-            const SizedBox(height: 8),
-            Text(
-              value,
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: color,
-                  ),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: Colors.white, size: 24),
             ),
-            const SizedBox(height: 4),
-            Text(
-              title,
-              style: Theme.of(context).textTheme.bodyLarge,
-              textAlign: TextAlign.center,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  value,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.9),
+                    fontSize: 14,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -183,30 +288,92 @@ class DoctorHomeTab extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       itemCount: 5,
       itemBuilder: (context, index) {
-        return Card(
-          margin: const EdgeInsets.only(bottom: 8),
-          child: ListTile(
-            leading: const CircleAvatar(
-              child: Icon(Icons.person),
-            ),
-            title: Text('مريض ${index + 1}'),
-            subtitle: Text('${10 + index}:00 صباحاً'),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.check, color: Colors.green),
-                  onPressed: () {
-                    // TODO: Confirm appointment
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(Icons.close, color: Colors.red),
-                  onPressed: () {
-                    // TODO: Cancel appointment
-                  },
+        return FadeInUp(
+          delay: Duration(milliseconds: 100 * index),
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
                 ),
               ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.primaries[index % Colors.primaries.length].shade300,
+                          Colors.primaries[index % Colors.primaries.length].shade600,
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(Icons.person, color: Colors.white, size: 30),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'مريض ${index + 1}',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            const Icon(Icons.access_time, size: 16, color: Colors.grey),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${10 + index}:00 صباحاً',
+                              style: const TextStyle(color: Colors.grey),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.green.shade50,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: IconButton(
+                      icon: Icon(Icons.check_rounded, color: Colors.green.shade700),
+                      onPressed: () {
+                        // TODO: Confirm appointment
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade50,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: IconButton(
+                      icon: Icon(Icons.close_rounded, color: Colors.red.shade700),
+                      onPressed: () {
+                        // TODO: Cancel appointment
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         );
