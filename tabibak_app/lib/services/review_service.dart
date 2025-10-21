@@ -10,6 +10,48 @@ class ReviewService {
     int page = 1,
     int limit = 10,
   }) async {
+    // TEMPORARY: Mock data for development
+    print('⭐ Mock getDoctorReviews: $doctorId');
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    final mockReviews = [
+      Review(
+        id: 1,
+        doctorId: doctorId,
+        patientId: 1,
+        patientName: 'أحمد علي',
+        rating: 5,
+        comment: 'طبيب ممتاز ومتعاون جداً. شرح لي حالتي بالتفصيل وأعطاني العلاج المناسب.',
+        createdAt: DateTime.now().subtract(const Duration(days: 3)),
+      ),
+      Review(
+        id: 2,
+        doctorId: doctorId,
+        patientId: 2,
+        patientName: 'فاطمة حسن',
+        rating: 4,
+        comment: 'خدمة جيدة ووقت الانتظار قصير. أنصح بزيارته.',
+        createdAt: DateTime.now().subtract(const Duration(days: 7)),
+      ),
+      Review(
+        id: 3,
+        doctorId: doctorId,
+        patientId: 3,
+        patientName: 'محمد سعيد',
+        rating: 5,
+        comment: 'من أفضل الأطباء الذين زرتهم. خبرة عالية واهتمام بالمريض.',
+        createdAt: DateTime.now().subtract(const Duration(days: 14)),
+      ),
+    ];
+
+    return {
+      'reviews': mockReviews,
+      'total': mockReviews.length,
+      'page': page,
+      'pages': 1,
+    };
+
+    /* REAL API CODE
     final queryParams = {
       'page': page.toString(),
       'limit': limit.toString(),
@@ -34,6 +76,7 @@ class ReviewService {
       'page': response['page'] ?? page,
       'pages': response['pages'] ?? 1,
     };
+    */
   }
 
   Future<Map<String, dynamic>> getDoctorRatingSummary(int doctorId) async {
